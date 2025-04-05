@@ -24,22 +24,20 @@ namespace MastersAlgorithms.Algorithms
             _game = game;
             var sw = new Stopwatch();
             sw.Start();
-            Search(_depth, 0, -MAX_VAL, MAX_VAL);
-            Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)");
+            int value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
+            Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
             return _bestMoveInRoot;
         }
 
         private int Search(int depth, int ply, int alpha, int beta)
         {
             _nodes++;
-            bool isRoot = ply == 0;
 
             if (depth == 0 || _game!.IsOver)
                 return _game!.Evaluate();
+            bool isRoot = ply == 0;
 
             var moves = _game.GetMoves();
-            // TODO -- Order moves
-
             int current_value = -MAX_VAL;
             int new_value;
             foreach (var move in moves)
