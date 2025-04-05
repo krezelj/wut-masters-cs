@@ -148,9 +148,9 @@ namespace MastersAlgorithms.Games
             }
         }
 
-        public int Evaluate()
+        public float Evaluate()
         {
-            int value = 0;
+            float value = 0;
             for (int i = 0; i < _boardSize; i++)
             {
                 for (int j = 0; j < _boardSize; j++)
@@ -161,6 +161,16 @@ namespace MastersAlgorithms.Games
                         value--;
                 }
             }
+
+            if (IsOver)
+            {
+                value = MathF.Sign(value);
+            }
+            else
+            {
+                value = value / (_boardSize * _boardSize);
+            }
+
             return value * (_player == 0 ? 1 : -1);
         }
 

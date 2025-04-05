@@ -24,12 +24,12 @@ namespace MastersAlgorithms.Algorithms
             _game = game;
             var sw = new Stopwatch();
             sw.Start();
-            int value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
+            float value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
             Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
             return _bestMoveInRoot;
         }
 
-        private int Search(int depth, int ply, int alpha, int beta)
+        private float Search(int depth, int ply, float alpha, float beta)
         {
             _nodes++;
 
@@ -38,8 +38,8 @@ namespace MastersAlgorithms.Algorithms
             bool isRoot = ply == 0;
 
             var moves = _game.GetMoves();
-            int current_value = -MAX_VAL;
-            int new_value;
+            float current_value = -MAX_VAL;
+            float new_value;
             foreach (var move in moves)
             {
                 _game.MakeMove(move);
@@ -49,7 +49,7 @@ namespace MastersAlgorithms.Algorithms
                 if (new_value > current_value)
                 {
                     current_value = new_value;
-                    alpha = Math.Max(current_value, alpha);
+                    alpha = MathF.Max(current_value, alpha);
                     if (isRoot)
                         _bestMoveInRoot = move;
                     if (alpha >= beta)
