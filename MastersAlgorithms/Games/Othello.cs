@@ -116,6 +116,7 @@ namespace MastersAlgorithms.Games
             }
             else
             {
+                _emptyCount--;
                 _playerBoard[move.I, move.J] = true;
                 foreach ((int i, int j) in move.Captures!)
                 {
@@ -136,6 +137,7 @@ namespace MastersAlgorithms.Games
             }
             else
             {
+                _emptyCount++;
                 _playerBoard[move.I, move.J] = false;
                 foreach ((int i, int j) in move.Captures!)
                 {
@@ -148,7 +150,7 @@ namespace MastersAlgorithms.Games
 
         public int Evaluate()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public void Display(bool showMoves = false)
