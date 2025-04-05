@@ -146,6 +146,11 @@ namespace MastersAlgorithms.Games
             }
         }
 
+        public int Evaluate()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Display(bool showMoves = false)
         {
             Console.Write("  ");

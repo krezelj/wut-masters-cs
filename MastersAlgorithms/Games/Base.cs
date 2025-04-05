@@ -25,6 +25,8 @@ namespace MastersAlgorithms.Games
 
         void UndoMove(T move);
 
+        int Evaluate();
+
         bool IsOver { get; }
     }
 }
