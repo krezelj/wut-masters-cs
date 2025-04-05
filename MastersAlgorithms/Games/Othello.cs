@@ -7,6 +7,7 @@ namespace MastersAlgorithms.Games
 
 
         private int _player = BLACK;
+        public int Player => _player;
         private int _opponent => 1 - _player;
         private int _nullMoves = 0;
         private int _boardSize;
@@ -38,7 +39,7 @@ namespace MastersAlgorithms.Games
             _emptyCount = _boardSize * _boardSize - 4;
         }
 
-        public Othello(string state, int player = 0) : this((int)Math.Sqrt(state.Length - 1), player)
+        public Othello(string state, int player = 0) : this((int)Math.Sqrt(state.Length - 2), player)
         {
             _emptyCount = 0;
             for (int i = 0; i < _boardSize; i++)
@@ -215,9 +216,9 @@ namespace MastersAlgorithms.Games
                     else if (_whiteBoard[i, j])
                         Console.Write("O ");
                     else if (showMoves && moves!.Any(m => m.I == i && m.J == j))
-                        Console.Write("+ ");
-                    else
                         Console.Write(". ");
+                    else
+                        Console.Write("  ");
                 }
                 Console.WriteLine();
             }
@@ -225,7 +226,7 @@ namespace MastersAlgorithms.Games
 
         public override string ToString()
         {
-            char[] chars = new char[_boardSize * _boardSize + 1];
+            char[] chars = new char[_boardSize * _boardSize + 2];
             for (int i = 0; i < _boardSize; i++)
             {
                 for (int j = 0; j < _boardSize; j++)
@@ -238,7 +239,7 @@ namespace MastersAlgorithms.Games
                         chars[i * _boardSize + j] = '.';
                 }
             }
-            chars[^2] = (char)(_nullMoves + '0');
+            chars[^2] = (char)(_player + '0');
             chars[^1] = (char)(_nullMoves + '0');
             return new string(chars);
         }

@@ -17,6 +17,8 @@ namespace MastersAlgorithms.Games
 
     public interface IGame<T>
     {
+        public int Player { get; }
+
         List<T> GetMoves();
 
         T GetRandomMove();

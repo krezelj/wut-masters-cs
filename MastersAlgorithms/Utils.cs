@@ -12,7 +12,7 @@ namespace MastersAlgorithms
 
         static Utils()
         {
-            RNG = new Random();
+            RNG = new Random(0);
         }
 
         public static bool InLimits(int i, int j, (int width, int height) shape)

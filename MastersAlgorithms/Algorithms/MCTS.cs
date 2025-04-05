@@ -113,7 +113,10 @@ namespace MastersAlgorithms.Algorithms
                 }
 
                 // rollout
-                float value = Rollout(current.Game);
+                IGame<T> terminalState = Rollout(current.Game.Copy());
+                float value = terminalState.Evaluate();
+                if (terminalState.Player == current.Game.Player)
+                    value = -value;
 
                 // backtrack
                 Backtrack(current, value);
@@ -133,7 +136,7 @@ namespace MastersAlgorithms.Algorithms
             return current;
         }
 
-        private float Rollout(IGame<T> game)
+        private IGame<T> Rollout(IGame<T> game)
         {
             while (!game.IsOver)
             {
@@ -141,7 +144,7 @@ namespace MastersAlgorithms.Algorithms
                 T move = game.GetRandomMove();
                 game.MakeMove(move);
             }
-            return game.Evaluate();
+            return game;
         }
 
         private void Backtrack(Node? current, float value)
