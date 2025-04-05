@@ -28,5 +28,7 @@ namespace MastersAlgorithms.Games
         int Evaluate();
 
         bool IsOver { get; }
+
+        IGame<T> Copy();
     }
 }

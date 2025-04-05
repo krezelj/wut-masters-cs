@@ -105,7 +105,7 @@ namespace MastersAlgorithms.Games
 
         public OthelloMove GetRandomMove()
         {
-            return OthelloMove.NullMove();
+            throw new NotImplementedException();
         }
 
         public void MakeMove(OthelloMove move)
@@ -162,6 +162,11 @@ namespace MastersAlgorithms.Games
                 }
             }
             return value * (_player == 0 ? 1 : -1);
+        }
+
+        public IGame<OthelloMove> Copy()
+        {
+            throw new NotImplementedException();
         }
 
         public void Display(bool showMoves = false)
