@@ -105,7 +105,9 @@ namespace MastersAlgorithms.Games
 
         public OthelloMove GetRandomMove()
         {
-            throw new NotImplementedException();
+            var moves = GetMoves();
+            int idx = Utils.RNG.Next(moves.Count);
+            return moves[idx];
         }
 
         public void MakeMove(OthelloMove move)
@@ -176,7 +178,20 @@ namespace MastersAlgorithms.Games
 
         public IGame<OthelloMove> Copy()
         {
-            throw new NotImplementedException();
+            Othello newGame = new Othello(_boardSize, _player);
+            newGame._nullMoves = _nullMoves;
+            newGame._emptyCount = _emptyCount;
+
+            for (int i = 0; i < _boardSize; i++)
+            {
+                for (int j = 0; j < _boardSize; j++)
+                {
+                    newGame._blackBoard[i, j] = _blackBoard[i, j];
+                    newGame._whiteBoard[i, j] = _whiteBoard[i, j];
+                }
+            }
+
+            return newGame;
         }
 
         public void Display(bool showMoves = false)

@@ -1,12 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace MastersAlgorithms
 {
     public static class Utils
     {
+        public static Random RNG;
+
+        static Utils()
+        {
+            RNG = new Random();
+        }
+
         public static bool InLimits(int i, int j, (int width, int height) shape)
         {
             return i >= 0 && i < shape.width && j >= 0 && j < shape.height;
