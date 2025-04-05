@@ -150,7 +150,18 @@ namespace MastersAlgorithms.Games
 
         public int Evaluate()
         {
-            return 0;
+            int value = 0;
+            for (int i = 0; i < _boardSize; i++)
+            {
+                for (int j = 0; j < _boardSize; j++)
+                {
+                    if (_blackBoard[i, j])
+                        value++;
+                    else if (_whiteBoard[i, j])
+                        value--;
+                }
+            }
+            return value * (_player == 0 ? 1 : -1);
         }
 
         public void Display(bool showMoves = false)
