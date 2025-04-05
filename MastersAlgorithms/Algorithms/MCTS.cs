@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
@@ -79,12 +80,17 @@ namespace MastersAlgorithms.Algorithms
 
         public T GetMove(IGame<T> game)
         {
+            var sw = new Stopwatch();
+            sw.Start();
+
             _root = new Node(game, null);
             _root.Expand();
-
             BuildTree();
 
-            return game.GetMoves()[_root.GetBestChildIndex((Node n) => n.VisitCount)];
+            int bestIdx = _root.GetBestChildIndex((Node n) => n.VisitCount);
+            float value = _root.Children![bestIdx].ValueSum / _root.Children[bestIdx].VisitCount;
+            Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+            return game.GetMoves()[bestIdx];
         }
 
         public void BuildTree()
