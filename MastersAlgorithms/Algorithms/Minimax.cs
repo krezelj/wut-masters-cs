@@ -26,6 +26,8 @@ namespace MastersAlgorithms.Algorithms
             sw.Start();
             float value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
             Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+
+            _nodes = 0;
             return _bestMoveInRoot;
         }
 

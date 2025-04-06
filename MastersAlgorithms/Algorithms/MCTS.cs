@@ -38,7 +38,7 @@ namespace MastersAlgorithms.Algorithms
                 foreach (var move in moves)
                 {
                     IGame<T> newGame = Game.Copy();
-                    newGame.MakeMove(move);
+                    newGame.MakeMove(move, false);
                     Children[populated++] = new Node(newGame, this);
                 }
             }
@@ -144,7 +144,7 @@ namespace MastersAlgorithms.Algorithms
             {
                 _nodes++;
                 T move = game.GetRandomMove();
-                game.MakeMove(move);
+                game.MakeMove(move, false);
             }
             return game;
         }

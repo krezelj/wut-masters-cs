@@ -55,34 +55,34 @@ namespace MastersAlgorithms.Games
             _nullMoves = state[^1] - '0';
         }
 
-        private List<(int, int)>? GetCapturesFromPosition(int i, int j)
+        private bool IsCapturePossible(int i, int j)
         {
             if (!_isEmpty(i, j))
-                return null;
+                return false;
 
-            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize, (x, y) => _opponentBoard[x, y]);
-            List<(int, int)> captures = new List<(int, int)>();
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize);
             foreach ((int di, int dj) in opponentDirections)
             {
                 int p = i + di;
                 int q = j + dj;
-                List<(int, int)> possibleCaptures = new List<(int, int)>();
+                if (!_opponentBoard[p, q])
+                    continue;
                 while (true)
                 {
                     if (!Utils.InLimits(p, q, _boardSize, _boardSize))
                         break;
                     if (!_opponentBoard[p, q])
                         break;
-                    possibleCaptures.Add((p, q));
 
                     p += di;
                     q += dj;
                 }
 
                 if (Utils.InLimits(p, q, _boardSize, _boardSize) && _playerBoard[p, q])
-                    captures.AddRange(possibleCaptures);
+                    return true;
             }
-            return captures.Count > 0 ? captures : null;
+
+            return false;
         }
 
         public List<OthelloMove> GetMoves()
@@ -93,9 +93,8 @@ namespace MastersAlgorithms.Games
             {
                 for (int j = 0; j < _boardSize; j++)
                 {
-                    var captures = GetCapturesFromPosition(i, j);
-                    if (captures != null)
-                        moves.Add(new OthelloMove(i, j, captures, _nullMoves));
+                    if (IsCapturePossible(i, j))
+                        moves.Add(new OthelloMove(i, j, _nullMoves));
                 }
             }
             if (moves.Count == 0)
@@ -110,7 +109,47 @@ namespace MastersAlgorithms.Games
             return moves[idx];
         }
 
-        public void MakeMove(OthelloMove move)
+        private List<(int, int)> GetCapturesFromPosition(int i, int j)
+        {
+            List<(int, int)>? captures = new List<(int, int)>(); ;
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize);
+            foreach ((int di, int dj) in opponentDirections)
+            {
+                List<(int, int)> capture = new List<(int, int)>();
+
+                int p = i + di;
+                int q = j + dj;
+                if (!_opponentBoard[p, q])
+                    continue;
+
+                while (true)
+                {
+                    if (!Utils.InLimits(p, q, _boardSize, _boardSize))
+                        break;
+                    if (!_opponentBoard[p, q])
+                        break;
+
+                    capture.Add((p, q));
+
+                    p += di;
+                    q += dj;
+                }
+                if (Utils.InLimits(p, q, _boardSize, _boardSize) && _playerBoard[p, q])
+                    captures.AddRange(capture);
+            }
+            return captures;
+        }
+
+        private void FlipPositions(List<(int, int)> captures, bool[,] toTrue, bool[,] toFalse)
+        {
+            foreach ((int i, int j) in captures)
+            {
+                toTrue[i, j] = true;
+                toFalse[i, j] = false;
+            }
+        }
+
+        public void MakeMove(OthelloMove move, bool updateMove = true)
         {
             if (move.IsNull)
             {
@@ -120,11 +159,10 @@ namespace MastersAlgorithms.Games
             {
                 _emptyCount--;
                 _playerBoard[move.I, move.J] = true;
-                foreach ((int i, int j) in move.Captures!)
-                {
-                    _opponentBoard[i, j] = false;
-                    _playerBoard[i, j] = true;
-                }
+                var captures = GetCapturesFromPosition(move.I, move.J);
+                FlipPositions(captures, _playerBoard, _opponentBoard);
+                if (updateMove)
+                    move.Captures = captures;
                 _nullMoves = 0;
             }
             _player = 1 - _player;
@@ -141,11 +179,7 @@ namespace MastersAlgorithms.Games
             {
                 _emptyCount++;
                 _playerBoard[move.I, move.J] = false;
-                foreach ((int i, int j) in move.Captures!)
-                {
-                    _opponentBoard[i, j] = true;
-                    _playerBoard[i, j] = false;
-                }
+                FlipPositions(move.Captures!, _opponentBoard, _playerBoard);
                 _nullMoves = move.NullMoves;
             }
         }
