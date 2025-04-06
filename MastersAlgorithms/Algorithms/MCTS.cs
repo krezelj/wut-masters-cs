@@ -90,6 +90,8 @@ namespace MastersAlgorithms.Algorithms
             int bestIdx = _root.GetBestChildIndex((Node n) => n.VisitCount);
             float value = _root.Children![bestIdx].ValueSum / _root.Children[bestIdx].VisitCount;
             Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+
+            _nodes = 0;
             return game.GetMoves()[bestIdx];
         }
 

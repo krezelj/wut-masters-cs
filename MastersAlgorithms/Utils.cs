@@ -15,13 +15,13 @@ namespace MastersAlgorithms
             RNG = new Random(0);
         }
 
-        public static bool InLimits(int i, int j, (int width, int height) shape)
+        public static bool InLimits(int i, int j, int width, int height)
         {
-            return i >= 0 && i < shape.width && j >= 0 && j < shape.height;
+            return i >= 0 && i < width && j >= 0 && j < height;
         }
 
         public static List<(int di, int dj)> GetNeighborDiffs(
-            int i, int j, (int width, int height) shape, Func<int, int, bool>? isValid = null)
+            int i, int j, int width, int height, Func<int, int, bool>? isValid = null)
         {
             List<(int, int)> diffs = new List<(int, int)>();
             for (int di = -1; di <= 1; di++)
@@ -32,7 +32,7 @@ namespace MastersAlgorithms
                         continue;
                     int newI = i + di;
                     int newJ = j + dj;
-                    if (!InLimits(newI, newJ, shape))
+                    if (!InLimits(newI, newJ, width, height))
                         continue;
 
                     if (isValid != null && isValid(newI, newJ))
@@ -45,10 +45,10 @@ namespace MastersAlgorithms
         }
 
         public static List<(int i, int j)> GetNeighbors(
-            int i, int j, (int width, int height) shape, Func<int, int, bool>? isValid = null
+            int i, int j, int width, int height, Func<int, int, bool>? isValid = null
         )
         {
-            var diffs = GetNeighborDiffs(i, j, shape, isValid);
+            var diffs = GetNeighborDiffs(i, j, width, height, isValid);
             List<(int di, int dj)> neighbors = new List<(int, int)>();
             foreach (var diff in diffs)
             {

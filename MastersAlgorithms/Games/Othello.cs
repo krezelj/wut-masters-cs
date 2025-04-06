@@ -11,7 +11,6 @@ namespace MastersAlgorithms.Games
         private int _opponent => 1 - _player;
         private int _nullMoves = 0;
         private int _boardSize;
-        private (int, int) _shape => (_boardSize, _boardSize);
         private bool _isEmpty(int i, int j) => !_whiteBoard[i, j] && !_blackBoard[i, j];
         private int _emptyCount;
         public bool IsOver => _emptyCount == 0 || _nullMoves == 2;
@@ -61,7 +60,7 @@ namespace MastersAlgorithms.Games
             if (!_isEmpty(i, j))
                 return null;
 
-            var opponentDirections = Utils.GetNeighborDiffs(i, j, _shape, (x, y) => _opponentBoard[x, y]);
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize, (x, y) => _opponentBoard[x, y]);
             List<(int, int)> captures = new List<(int, int)>();
             foreach ((int di, int dj) in opponentDirections)
             {
@@ -70,7 +69,7 @@ namespace MastersAlgorithms.Games
                 List<(int, int)> possibleCaptures = new List<(int, int)>();
                 while (true)
                 {
-                    if (!Utils.InLimits(p, q, _shape))
+                    if (!Utils.InLimits(p, q, _boardSize, _boardSize))
                         break;
                     if (!_opponentBoard[p, q])
                         break;
@@ -80,7 +79,7 @@ namespace MastersAlgorithms.Games
                     q += dj;
                 }
 
-                if (Utils.InLimits(p, q, _shape) && _playerBoard[p, q])
+                if (Utils.InLimits(p, q, _boardSize, _boardSize) && _playerBoard[p, q])
                     captures.AddRange(possibleCaptures);
             }
             return captures.Count > 0 ? captures : null;
