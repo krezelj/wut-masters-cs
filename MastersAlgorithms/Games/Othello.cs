@@ -104,9 +104,27 @@ namespace MastersAlgorithms.Games
 
         public OthelloMove GetRandomMove()
         {
+            // to avoid infinite loop, educated guess, seems to work well
+            int MAX_TRIES = _boardSize * _boardSize;
+
+            // if there is enough empty space, we can try random moves
+            bool CAN_TRY = _emptyCount > 3;
+
+            ulong mask = 0; // !!! Assuming max board size is 8x8
+            for (int t = 0; t < MAX_TRIES && CAN_TRY; t++)
+            {
+                int idx = Utils.RNG.Next(0, _boardSize * _boardSize);
+                if ((mask & (1UL << idx)) != 0)
+                    continue;
+                int i = idx / _boardSize;
+                int j = idx % _boardSize;
+                if (IsCapturePossible(i, j))
+                    return new OthelloMove(i, j, _nullMoves);
+                mask |= (1UL << idx);
+            }
+
             var moves = GetMoves();
-            int idx = Utils.RNG.Next(moves.Count);
-            return moves[idx];
+            return moves[Utils.RNG.Next(moves.Count)];
         }
 
         private List<(int, int)> GetCapturesFromPosition(int i, int j)
