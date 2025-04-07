@@ -71,11 +71,14 @@ namespace MastersAlgorithms.Algorithms
         private int _maxIters;
         private Func<Node, float> _estimator;
 
-        public MCTS(int maxIters, Func<Node, float> estimator)
+        private bool _verbose;
+
+        public MCTS(int maxIters, Func<Node, float> estimator, bool verbose = false)
         {
             _root = null;
             _maxIters = maxIters;
             _estimator = estimator;
+            _verbose = verbose;
         }
 
         public IMove GetMove(IGame game)
@@ -89,7 +92,8 @@ namespace MastersAlgorithms.Algorithms
 
             int bestIdx = _root.GetBestChildIndex((Node n) => n.VisitCount);
             float value = _root.Children![bestIdx].ValueSum / _root.Children[bestIdx].VisitCount;
-            Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+            if (_verbose)
+                Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
 
             _nodes = 0;
             return game.GetMoves()[bestIdx];
@@ -160,6 +164,18 @@ namespace MastersAlgorithms.Algorithms
         }
 
         #region ESTIMATORS
+
+        public static Func<Node, float> GetEstimatorByName(string name)
+        {
+            switch (name)
+            {
+                case "ucb":
+                    return UCB;
+                default:
+                    throw new ArgumentException($"Invalid estimator name: {name}");
+            }
+        }
+
         public static float UCB(Node node)
         {
             if (node.VisitCount == 0)

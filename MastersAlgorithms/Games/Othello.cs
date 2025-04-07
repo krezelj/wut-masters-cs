@@ -1,7 +1,9 @@
 namespace MastersAlgorithms.Games
 {
-    public class OthelloMove(int i, int j, int nullMoves) : IMove
+    public class OthelloMove(int i, int j, int nullMoves, int boardSize) : IMove
     {
+        public int Index => i * boardSize + j;
+        public int BoardSize => boardSize;
         public int I => i;
         public int J => j;
         public List<(int, int)>? Captures;
@@ -10,7 +12,7 @@ namespace MastersAlgorithms.Games
 
         public static OthelloMove NullMove()
         {
-            return new OthelloMove(-1, -1, 0);
+            return new OthelloMove(-1, -1, 0, -1);
         }
     }
 
@@ -106,7 +108,7 @@ namespace MastersAlgorithms.Games
                 for (int j = 0; j < _boardSize; ++j)
                 {
                     if (IsCapturePossible(i, j))
-                        moves.Add(new OthelloMove(i, j, _nullMoves));
+                        moves.Add(new OthelloMove(i, j, _nullMoves, _boardSize));
                 }
             }
             if (moves.Count == 0)
@@ -131,7 +133,7 @@ namespace MastersAlgorithms.Games
                 int i = idx / _boardSize;
                 int j = idx % _boardSize;
                 if (IsCapturePossible(i, j))
-                    return new OthelloMove(i, j, _nullMoves);
+                    return new OthelloMove(i, j, _nullMoves, _boardSize);
                 mask |= 1UL << idx;
             }
 

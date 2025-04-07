@@ -10,13 +10,15 @@ namespace MastersAlgorithms.Algorithms
 
         private long _nodes = 0;
         private int _depth;
+        private bool _verbose;
 
         private IGame? _game;
         private IMove? _bestMoveInRoot;
 
-        public Minimax(int depth)
+        public Minimax(int depth, bool verbose = false)
         {
             _depth = depth;
+            _verbose = verbose;
         }
 
         public IMove? GetMove(IGame game)
@@ -25,7 +27,8 @@ namespace MastersAlgorithms.Algorithms
             var sw = new Stopwatch();
             sw.Start();
             float value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
-            Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+            if (_verbose)
+                Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
 
             _nodes = 0;
             return _bestMoveInRoot;
