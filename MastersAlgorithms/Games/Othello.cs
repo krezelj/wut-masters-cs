@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace MastersAlgorithms.Games
 {
     public class Othello : IGame<OthelloMove>
@@ -41,12 +43,12 @@ namespace MastersAlgorithms.Games
         public Othello(string state, int player = 0) : this((int)Math.Sqrt(state.Length - 2), player)
         {
             _emptyCount = 0;
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     if (state[i * _boardSize + j] == '.')
-                        _emptyCount++;
+                        ++_emptyCount;
                     _blackBoard[i, j] = state[i * _boardSize + j] == 'X';
                     _whiteBoard[i, j] = state[i * _boardSize + j] == 'O';
                 }
@@ -60,22 +62,20 @@ namespace MastersAlgorithms.Games
             if (!_isEmpty(i, j))
                 return false;
 
-            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize);
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize, ignoreLimits: true);
             foreach ((int di, int dj) in opponentDirections)
             {
                 int p = i + di;
                 int q = j + dj;
-                if (!_opponentBoard[p, q])
+                if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
                     continue;
                 while (true)
                 {
-                    if (!Utils.InLimits(p, q, _boardSize, _boardSize))
-                        break;
-                    if (!_opponentBoard[p, q])
-                        break;
-
                     p += di;
                     q += dj;
+
+                    if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
+                        break;
                 }
 
                 if (Utils.InLimits(p, q, _boardSize, _boardSize) && _playerBoard[p, q])
@@ -89,9 +89,9 @@ namespace MastersAlgorithms.Games
         {
             List<OthelloMove> moves = new List<OthelloMove>();
 
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     if (IsCapturePossible(i, j))
                         moves.Add(new OthelloMove(i, j, _nullMoves));
@@ -111,7 +111,7 @@ namespace MastersAlgorithms.Games
             bool CAN_TRY = _emptyCount > 3;
 
             ulong mask = 0; // !!! Assuming max board size is 8x8
-            for (int t = 0; t < MAX_TRIES && CAN_TRY; t++)
+            for (int t = 0; t < MAX_TRIES && CAN_TRY; ++t)
             {
                 int idx = Utils.RNG.Next(0, _boardSize * _boardSize);
                 if ((mask & (1UL << idx)) != 0)
@@ -130,32 +130,62 @@ namespace MastersAlgorithms.Games
         private List<(int, int)> GetCapturesFromPosition(int i, int j)
         {
             List<(int, int)>? captures = new List<(int, int)>(); ;
-            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize);
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize, ignoreLimits: true);
             foreach ((int di, int dj) in opponentDirections)
             {
                 List<(int, int)> capture = new List<(int, int)>();
 
                 int p = i + di;
                 int q = j + dj;
-                if (!_opponentBoard[p, q])
+                if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
                     continue;
 
                 while (true)
                 {
-                    if (!Utils.InLimits(p, q, _boardSize, _boardSize))
-                        break;
-                    if (!_opponentBoard[p, q])
-                        break;
-
                     capture.Add((p, q));
-
                     p += di;
                     q += dj;
+
+                    if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
+                        break;
                 }
                 if (Utils.InLimits(p, q, _boardSize, _boardSize) && _playerBoard[p, q])
                     captures.AddRange(capture);
             }
             return captures;
+        }
+
+        private void MakeCapturesFromPosition(int i, int j)
+        {
+            var opponentDirections = Utils.GetNeighborDiffs(i, j, _boardSize, _boardSize, ignoreLimits: true);
+            foreach ((int di, int dj) in opponentDirections)
+            {
+                int lineLength = 1;
+                int p = i + di;
+                int q = j + dj;
+                if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
+                    continue;
+
+                while (true)
+                {
+                    p += di;
+                    q += dj;
+                    if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_opponentBoard[p, q])
+                        break;
+                    ++lineLength;
+                }
+                if (!Utils.InLimits(p, q, _boardSize, _boardSize) || !_playerBoard[p, q])
+                    continue;
+
+                while (lineLength > 0)
+                {
+                    p -= di;
+                    q -= dj;
+                    --lineLength;
+                    _playerBoard[p, q] = true;
+                    _opponentBoard[p, q] = false;
+                }
+            }
         }
 
         private void FlipPositions(List<(int, int)> captures, bool[,] toTrue, bool[,] toFalse)
@@ -171,16 +201,24 @@ namespace MastersAlgorithms.Games
         {
             if (move.IsNull)
             {
-                _nullMoves++;
+                ++_nullMoves;
             }
             else
             {
-                _emptyCount--;
+                --_emptyCount;
                 _playerBoard[move.I, move.J] = true;
-                var captures = GetCapturesFromPosition(move.I, move.J);
-                FlipPositions(captures, _playerBoard, _opponentBoard);
                 if (updateMove)
-                    move.Captures = captures;
+                {
+                    var captures = GetCapturesFromPosition(move.I, move.J);
+                    FlipPositions(captures, _playerBoard, _opponentBoard);
+                    if (updateMove)
+                        move.Captures = captures;
+                }
+                else
+                {
+                    MakeCapturesFromPosition(move.I, move.J);
+                }
+
                 _nullMoves = 0;
             }
             _player = 1 - _player;
@@ -191,11 +229,11 @@ namespace MastersAlgorithms.Games
             _player = 1 - _player;
             if (move.IsNull)
             {
-                _nullMoves--;
+                --_nullMoves;
             }
             else
             {
-                _emptyCount++;
+                ++_emptyCount;
                 _playerBoard[move.I, move.J] = false;
                 FlipPositions(move.Captures!, _opponentBoard, _playerBoard);
                 _nullMoves = move.NullMoves;
@@ -205,14 +243,14 @@ namespace MastersAlgorithms.Games
         public float Evaluate()
         {
             float value = 0;
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     if (_blackBoard[i, j])
-                        value++;
+                        ++value;
                     else if (_whiteBoard[i, j])
-                        value--;
+                        --value;
                 }
             }
 
@@ -234,9 +272,9 @@ namespace MastersAlgorithms.Games
             newGame._nullMoves = _nullMoves;
             newGame._emptyCount = _emptyCount;
 
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     newGame._blackBoard[i, j] = _blackBoard[i, j];
                     newGame._whiteBoard[i, j] = _whiteBoard[i, j];
@@ -249,7 +287,7 @@ namespace MastersAlgorithms.Games
         public void Display(bool showMoves = false)
         {
             Console.Write("  ");
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < _boardSize; ++j)
             {
                 Console.Write((char)('a' + j) + " ");
             }
@@ -257,10 +295,10 @@ namespace MastersAlgorithms.Games
 
             var moves = showMoves ? GetMoves() : null;
 
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
                 Console.Write($"{i + 1} ");
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     if (_blackBoard[i, j])
                         Console.Write("X ");
@@ -278,9 +316,9 @@ namespace MastersAlgorithms.Games
         public override string ToString()
         {
             char[] chars = new char[_boardSize * _boardSize + 2];
-            for (int i = 0; i < _boardSize; i++)
+            for (int i = 0; i < _boardSize; ++i)
             {
-                for (int j = 0; j < _boardSize; j++)
+                for (int j = 0; j < _boardSize; ++j)
                 {
                     if (_blackBoard[i, j])
                         chars[i * _boardSize + j] = 'X';

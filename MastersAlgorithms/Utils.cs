@@ -21,7 +21,7 @@ namespace MastersAlgorithms
         }
 
         public static (int, int)[] GetNeighborDiffs(
-            int i, int j, int width, int height)
+            int i, int j, int width, int height, bool ignoreLimits = false)
         {
             (int, int)[] diffs = new (int, int)[8];
             int count = 0;
@@ -34,10 +34,8 @@ namespace MastersAlgorithms
                         continue;
                     int newI = i + di;
                     int newJ = j + dj;
-                    if (!InLimits(newI, newJ, width, height))
-                        continue;
-
-                    diffs[count++] = (di, dj);
+                    if (ignoreLimits || InLimits(newI, newJ, width, height))
+                        diffs[count++] = (di, dj);
                 }
             }
             Array.Resize(ref diffs, count);
