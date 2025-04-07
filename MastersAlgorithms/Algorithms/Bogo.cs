@@ -2,9 +2,9 @@ using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
 {
-    public class Bogo<T> : IAlgorithm<T>
+    public class Bogo : IAlgorithm
     {
-        public T GetMove(IGame<T> game)
+        public IMove GetMove(IGame game)
         {
             return game.GetRandomMove();
         }

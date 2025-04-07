@@ -1,21 +1,21 @@
 namespace MastersAlgorithms.Games
 {
-    public interface IGame<T>
+    public interface IGame
     {
         public int Player { get; }
 
-        List<T> GetMoves();
+        List<IMove> GetMoves();
 
-        T GetRandomMove();
+        IMove GetRandomMove();
 
-        void MakeMove(T move, bool updateMove = true);
+        void MakeMove(IMove move, bool updateMove = true);
 
-        void UndoMove(T move);
+        void UndoMove(IMove move);
 
         float Evaluate();
 
         bool IsOver { get; }
 
-        IGame<T> Copy();
+        IGame Copy();
     }
 }

@@ -4,22 +4,22 @@ using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
 {
-    public class Minimax<T> : IAlgorithm<T>
+    public class Minimax : IAlgorithm
     {
         private const int MAX_VAL = 10_000;
 
         private long _nodes = 0;
         private int _depth;
 
-        private IGame<T>? _game;
-        private T? _bestMoveInRoot;
+        private IGame? _game;
+        private IMove? _bestMoveInRoot;
 
         public Minimax(int depth)
         {
             _depth = depth;
         }
 
-        public T? GetMove(IGame<T> game)
+        public IMove? GetMove(IGame game)
         {
             _game = game;
             var sw = new Stopwatch();

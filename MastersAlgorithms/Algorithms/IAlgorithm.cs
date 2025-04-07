@@ -2,8 +2,8 @@ using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
 {
-    public interface IAlgorithm<T>
+    public interface IAlgorithm
     {
-        T? GetMove(IGame<T> game);
+        IMove? GetMove(IGame game);
     }
 }

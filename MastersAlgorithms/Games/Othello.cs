@@ -14,7 +14,7 @@ namespace MastersAlgorithms.Games
         }
     }
 
-    public class Othello : IGame<OthelloMove>
+    public class Othello : IGame
     {
         private const int BLACK = 0;
         private const int WHITE = 1;
@@ -97,7 +97,7 @@ namespace MastersAlgorithms.Games
             return false;
         }
 
-        public List<OthelloMove> GetMoves()
+        public List<IMove> GetMoves()
         {
             List<OthelloMove> moves = new List<OthelloMove>();
 
@@ -111,10 +111,10 @@ namespace MastersAlgorithms.Games
             }
             if (moves.Count == 0)
                 moves.Add(OthelloMove.NullMove());
-            return moves;
+            return moves.Cast<IMove>().ToList();
         }
 
-        public OthelloMove GetRandomMove()
+        public IMove GetRandomMove()
         {
             // to avoid infinite loop, educated guess, seems to work well
             int MAX_TRIES = _boardSize * _boardSize;
@@ -132,7 +132,7 @@ namespace MastersAlgorithms.Games
                 int j = idx % _boardSize;
                 if (IsCapturePossible(i, j))
                     return new OthelloMove(i, j, _nullMoves);
-                mask |= (1UL << idx);
+                mask |= 1UL << idx;
             }
 
             var moves = GetMoves();
@@ -209,8 +209,9 @@ namespace MastersAlgorithms.Games
             }
         }
 
-        public void MakeMove(OthelloMove move, bool updateMove = true)
+        public void MakeMove(IMove m, bool updateMove = true)
         {
+            OthelloMove move = (OthelloMove)m;
             if (move.IsNull)
             {
                 ++_nullMoves;
@@ -236,8 +237,9 @@ namespace MastersAlgorithms.Games
             _player = 1 - _player;
         }
 
-        public void UndoMove(OthelloMove move)
+        public void UndoMove(IMove m)
         {
+            OthelloMove move = (OthelloMove)m;
             _player = 1 - _player;
             if (move.IsNull)
             {
@@ -278,7 +280,7 @@ namespace MastersAlgorithms.Games
             return value * (_player == 0 ? 1 : -1);
         }
 
-        public IGame<OthelloMove> Copy()
+        public IGame Copy()
         {
             Othello newGame = new Othello(_boardSize, _player);
             newGame._nullMoves = _nullMoves;
@@ -305,7 +307,7 @@ namespace MastersAlgorithms.Games
             }
             Console.WriteLine();
 
-            var moves = showMoves ? GetMoves() : null;
+            var moves = showMoves ? GetMoves().Cast<OthelloMove>().ToList() : null;
 
             for (int i = 0; i < _boardSize; ++i)
             {

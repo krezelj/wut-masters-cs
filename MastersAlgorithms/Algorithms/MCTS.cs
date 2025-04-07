@@ -5,11 +5,11 @@ namespace MastersAlgorithms.Algorithms
 {
 
 
-    public class MCTS<T> : IAlgorithm<T>
+    public class MCTS : IAlgorithm
     {
         public class Node
         {
-            public IGame<T> Game;
+            public IGame Game;
             public Node? Parent;
             public Node[]? Children;
             public bool Expanded;
@@ -18,7 +18,7 @@ namespace MastersAlgorithms.Algorithms
             public int VisitCount;
             public float ValueSum;
 
-            public Node(IGame<T> game, Node? parent = null)
+            public Node(IGame game, Node? parent = null)
             {
                 Game = game;
                 Parent = parent;
@@ -37,7 +37,7 @@ namespace MastersAlgorithms.Algorithms
                 int populated = 0;
                 foreach (var move in moves)
                 {
-                    IGame<T> newGame = Game.Copy();
+                    IGame newGame = Game.Copy();
                     newGame.MakeMove(move, false);
                     Children[populated++] = new Node(newGame, this);
                 }
@@ -78,7 +78,7 @@ namespace MastersAlgorithms.Algorithms
             _estimator = estimator;
         }
 
-        public T GetMove(IGame<T> game)
+        public IMove GetMove(IGame game)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -115,7 +115,7 @@ namespace MastersAlgorithms.Algorithms
                 }
 
                 // rollout
-                IGame<T> terminalState = Rollout(current.Game.Copy());
+                IGame terminalState = Rollout(current.Game.Copy());
                 float value = terminalState.Evaluate();
                 if (terminalState.Player == current.Game.Player)
                     value = -value;
@@ -138,12 +138,12 @@ namespace MastersAlgorithms.Algorithms
             return current;
         }
 
-        private IGame<T> Rollout(IGame<T> game)
+        private IGame Rollout(IGame game)
         {
             while (!game.IsOver)
             {
                 _nodes++;
-                T move = game.GetRandomMove();
+                IMove move = game.GetRandomMove();
                 game.MakeMove(move, false);
             }
             return game;
