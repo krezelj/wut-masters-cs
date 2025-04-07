@@ -5,7 +5,7 @@ namespace MastersAlgorithms.Algorithms
 {
 
 
-    public class MCTS<T>
+    public class MCTS<T> : IAlgorithm<T>
     {
         public class Node
         {

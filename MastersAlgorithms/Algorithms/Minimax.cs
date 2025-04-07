@@ -4,7 +4,7 @@ using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
 {
-    public class Minimax<T>
+    public class Minimax<T> : IAlgorithm<T>
     {
         private const int MAX_VAL = 10_000;
 
