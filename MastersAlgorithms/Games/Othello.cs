@@ -1,6 +1,6 @@
 namespace MastersAlgorithms.Games
 {
-    public class OthelloMove(int i, int j, int nullMoves)
+    public class OthelloMove(int i, int j, int nullMoves) : IMove
     {
         public int I => i;
         public int J => j;
