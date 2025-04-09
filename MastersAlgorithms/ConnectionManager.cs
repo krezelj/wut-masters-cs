@@ -65,6 +65,7 @@ namespace MastersAlgorithms
 
         public void Run()
         {
+            Utils.SetRNGSeed(int.Parse(_cml.Get("seed", "0")));
             IAlgorithm algorithm = CreateAlgorithm();
             while (true)
             {
@@ -90,7 +91,7 @@ namespace MastersAlgorithms
                     );
                 case "mcts":
                     return new MCTS(
-                        maxIters: int.Parse(_cml.Get("max-iters")),
+                        maxIters: int.Parse(_cml.Get("maxiters")),
                         estimator: MCTS.GetEstimatorByName(_cml.Get("estimator", "ucb"))
                     );
                 default:

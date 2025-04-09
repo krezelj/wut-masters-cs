@@ -15,6 +15,11 @@ namespace MastersAlgorithms
             RNG = new Random(0);
         }
 
+        public static void SetRNGSeed(int seed)
+        {
+            RNG = new Random(seed);
+        }
+
         public static bool InLimits(int i, int j, int width, int height)
         {
             return i >= 0 && i < width && j >= 0 && j < height;

@@ -2,7 +2,7 @@ namespace MastersAlgorithms.Games
 {
     public class OthelloMove(int i, int j, int nullMoves, int boardSize) : IMove
     {
-        public int Index => i * boardSize + j;
+        public int Index => IsNull ? -1 : (i * boardSize + j);
         public int BoardSize => boardSize;
         public int I => i;
         public int J => j;
