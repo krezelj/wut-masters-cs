@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using MastersAlgorithms.Games;
 
-namespace MastersAlgorithm
+namespace MastersAlgorithms
 {
     public class Perft
     {
