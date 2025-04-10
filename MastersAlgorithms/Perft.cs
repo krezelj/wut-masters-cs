@@ -27,7 +27,7 @@ namespace MastersAlgorithms
                 sw.Stop();
 
                 float kns = _leafNodes / (float)sw.ElapsedMilliseconds;
-                Console.WriteLine("depth {0,2} | {1,11} | {2,8}ms | {3,6}kN/s |",
+                Console.WriteLine("depth {0,2} | {1,11} | {2,8}ms | {3,8}kN/s |",
                     depth, _leafNodes, sw.ElapsedMilliseconds, MathF.Round(kns, 2));
             }
         }
