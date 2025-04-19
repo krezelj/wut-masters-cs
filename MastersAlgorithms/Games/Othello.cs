@@ -10,9 +10,9 @@ namespace MastersAlgorithms.Games
         public int NullMoves => nullMoves;
         public bool IsNull => I < 0;
 
-        public static OthelloMove NullMove()
+        public static OthelloMove NullMove(int nullMoves)
         {
-            return new OthelloMove(-1, -1, 0, -1);
+            return new OthelloMove(-1, -1, nullMoves, -1);
         }
     }
 
@@ -37,7 +37,7 @@ namespace MastersAlgorithms.Games
         private bool[,] _playerBoard => _player == 0 ? _blackBoard : _whiteBoard;
         private bool[,] _opponentBoard => _player == 1 ? _blackBoard : _whiteBoard;
 
-        public Othello(int boardSize, int player = 0)
+        public Othello(int boardSize, int player = BLACK)
         {
             _player = player;
 
@@ -54,7 +54,7 @@ namespace MastersAlgorithms.Games
             _emptyCount = _boardSize * _boardSize - 4;
         }
 
-        public Othello(string state, int player = 0) : this((int)Math.Sqrt(state.Length - 2), player)
+        public Othello(string state, int player = BLACK) : this((int)Math.Sqrt(state.Length - 2), player)
         {
             _emptyCount = 0;
             for (int i = 0; i < _boardSize; ++i)
@@ -112,7 +112,7 @@ namespace MastersAlgorithms.Games
                 }
             }
             if (moves.Count == 0)
-                moves.Add(OthelloMove.NullMove());
+                moves.Add(OthelloMove.NullMove(_nullMoves));
             return moves.Cast<IMove>().ToList();
         }
 
