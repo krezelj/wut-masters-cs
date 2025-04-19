@@ -4,6 +4,8 @@ namespace MastersAlgorithms.Games
     {
         public int Player { get; }
 
+        bool IsOver { get; }
+
         List<IMove> GetMoves();
 
         IMove GetRandomMove();
@@ -14,8 +16,8 @@ namespace MastersAlgorithms.Games
 
         float Evaluate();
 
-        bool IsOver { get; }
-
         IGame Copy();
+
+        void Display(bool showMoves = true);
     }
 }
