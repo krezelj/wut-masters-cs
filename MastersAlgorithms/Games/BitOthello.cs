@@ -73,6 +73,8 @@ namespace MastersAlgorithms.Games
 
         public BitOthello(string state, int player = BLACK) : this(player)
         {
+            _blackBoard = 0UL;
+            _whiteBoard = 0UL;
             for (int i = 0; i < BOARD_SIZE; ++i)
             {
                 for (int j = 0; j < BOARD_SIZE; ++j)
