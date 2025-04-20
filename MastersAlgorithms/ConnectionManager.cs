@@ -107,7 +107,7 @@ namespace MastersAlgorithms
                 // case "connect-four":
                 //     return new ConnectFour(state);
                 case "othello":
-                    return new Othello(state);
+                    return new BitOthello(state);
                 default:
                     throw new ArgumentException($"Invalid game name: {gameType}");
             }

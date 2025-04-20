@@ -73,7 +73,18 @@ namespace MastersAlgorithms.Games
 
         public BitOthello(string state, int player = BLACK) : this(player)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < BOARD_SIZE; ++i)
+            {
+                for (int j = 0; j < BOARD_SIZE; ++j)
+                {
+                    if (state[i * BOARD_SIZE + j] == 'X')
+                        _blackBoard.SetPositions(BitBoard.GetPosition(i, j));
+                    if (state[i * BOARD_SIZE + j] == 'O')
+                        _whiteBoard.SetPositions(BitBoard.GetPosition(i, j));
+                }
+            }
+            _player = (sbyte)(state[^2] - '0');
+            _nullMoves = (sbyte)(state[^1] - '0');
         }
 
         private bool IsCapturePossible(ulong position)
@@ -186,12 +197,29 @@ namespace MastersAlgorithms.Games
 
         public float Evaluate()
         {
-            throw new NotImplementedException();
+            int blackCount = BitOperations.PopCount(_blackBoard);
+            int whiteCount = BitOperations.PopCount(_whiteBoard);
+            float value = blackCount - whiteCount;
+
+            if (IsOver)
+            {
+                value = MathF.Sign(value);
+            }
+            else
+            {
+                value = value / (BOARD_SIZE * BOARD_SIZE);
+            }
+
+            return value * (_player == 0 ? 1 : -1);
         }
 
         public IGame Copy()
         {
-            throw new NotImplementedException();
+            BitOthello newGame = new BitOthello(_player);
+            newGame._nullMoves = _nullMoves;
+            newGame._blackBoard = _blackBoard;
+            newGame._whiteBoard = _whiteBoard;
+            return newGame;
         }
 
         public void Display(bool showMoves = false)
