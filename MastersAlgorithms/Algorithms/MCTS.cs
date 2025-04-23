@@ -163,6 +163,11 @@ namespace MastersAlgorithms.Algorithms
             }
         }
 
+        public string GetDebugInfo()
+        {
+            throw new NotImplementedException();
+        }
+
         #region ESTIMATORS
 
         public static Func<Node, float> GetEstimatorByName(string name)

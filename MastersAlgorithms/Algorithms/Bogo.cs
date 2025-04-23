@@ -8,5 +8,10 @@ namespace MastersAlgorithms.Algorithms
         {
             return game.GetRandomMove();
         }
+
+        public string GetDebugInfo()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -48,9 +48,9 @@ namespace MastersAlgorithms
             throw new KeyNotFoundException($"{key} not found in options");
         }
 
-        public bool GetSwitch(bool value)
+        public bool GetSwitch(string key)
         {
-            return _args.Contains("--" + value);
+            return _args.Contains("--" + key);
         }
     }
 
@@ -76,7 +76,9 @@ namespace MastersAlgorithms
                 IGame game = CreateGame(state);
                 IMove move = algorithm.GetMove(game)!;
 
-                Console.WriteLine(move.Index);
+                string debugMsg = _cml.GetSwitch("verbose") ? algorithm.GetDebugInfo() : "";
+                string response = $"{move.Index};{debugMsg}";
+                Console.WriteLine(response);
             }
         }
 
