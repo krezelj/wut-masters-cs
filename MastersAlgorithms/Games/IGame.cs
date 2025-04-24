@@ -6,6 +6,8 @@ namespace MastersAlgorithms.Games
 
         bool IsOver { get; }
 
+        public ulong zKey { get; }
+
         List<IMove> GetMoves();
 
         IMove GetRandomMove();

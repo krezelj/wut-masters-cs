@@ -1,14 +1,25 @@
 using System.Diagnostics;
-
 using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms.Algorithms
 {
-    public class Minimax : IAlgorithm
+    public class MinimaxFast : IAlgorithm
     {
+        private record struct Transposition
+        (
+            ulong zKey,
+            // IMove move,
+            float evaluation,
+            int depth,
+            int nodeType
+        );
+        private Transposition[] _transpositions = new Transposition[0x400000];
+
+
         private const int MAX_VAL = 10_000_000;
 
         private long _nodes = 0;
+        private long _cacheHits = 0;
         private int _depth;
         private bool _verbose;
 
@@ -18,7 +29,7 @@ namespace MastersAlgorithms.Algorithms
         private IGame? _game;
         private IMove? _bestMoveInRoot;
 
-        public Minimax(int depth, bool verbose = false)
+        public MinimaxFast(int depth, bool verbose = false)
         {
             _sw = new Stopwatch();
             _depth = depth;
@@ -28,6 +39,7 @@ namespace MastersAlgorithms.Algorithms
         public IMove? GetMove(IGame game)
         {
             _nodes = 0;
+            _cacheHits = 0;
             _game = game;
             _sw.Restart();
             _value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
@@ -46,9 +58,29 @@ namespace MastersAlgorithms.Algorithms
                 return _game!.Evaluate();
             bool isRoot = ply == 0;
 
+            ulong zKey = _game.zKey;
+            ref Transposition tMatch = ref _transpositions[zKey & 0x3FFFFF];
+            if (tMatch.zKey == zKey && !isRoot && tMatch.depth >= depth)
+            {
+                bool cacheHit = false;
+                if (tMatch.nodeType == 1)
+                    cacheHit = true;
+                else if (tMatch.nodeType == 0 && tMatch.evaluation <= alpha)
+                    cacheHit = true;
+                else if (tMatch.nodeType == 2 && tMatch.evaluation >= beta)
+                    cacheHit = true;
+                if (cacheHit)
+                {
+                    _cacheHits++;
+                    return tMatch.evaluation;
+                }
+            }
+
             var moves = _game.GetMoves();
+            // IMove? currentBestMove = null;
             float currentValue = -MAX_VAL;
             float newValue;
+            float startAlpha = alpha;
             foreach (var move in moves)
             {
                 _game.MakeMove(move);
@@ -58,6 +90,7 @@ namespace MastersAlgorithms.Algorithms
                 if (newValue > currentValue)
                 {
                     currentValue = newValue;
+                    // currentBestMove = move;
                     alpha = MathF.Max(currentValue, alpha);
                     if (isRoot)
                         _bestMoveInRoot = move;
@@ -67,13 +100,20 @@ namespace MastersAlgorithms.Algorithms
                 }
             }
 
+            tMatch = new(
+                zKey,
+                // currentBestMove!,
+                currentValue,
+                depth,
+                currentValue >= beta ? 2 : currentValue <= startAlpha ? 0 : 1);
+
             return currentValue;
         }
 
         public string GetDebugInfo()
         {
-            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | Eval {3}",
-                _nodes, _nodes / _time, _time, _value);
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | Cache Hits {3,7} | Eval {4}",
+                _nodes, _nodes / _time, _time, _cacheHits, _value);
         }
     }
 }

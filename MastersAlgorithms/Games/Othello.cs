@@ -37,6 +37,8 @@ namespace MastersAlgorithms.Games
         private bool[,] _playerBoard => _player == 0 ? _blackBoard : _whiteBoard;
         private bool[,] _opponentBoard => _player == 1 ? _blackBoard : _whiteBoard;
 
+        public ulong zKey => throw new NotImplementedException(); // TODO implment updating zKey
+
         public Othello(int boardSize, int player = BLACK)
         {
             _player = player;
