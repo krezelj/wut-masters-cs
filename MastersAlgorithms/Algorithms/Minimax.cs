@@ -47,18 +47,18 @@ namespace MastersAlgorithms.Algorithms
             bool isRoot = ply == 0;
 
             var moves = _game.GetMoves();
-            float current_value = -MAX_VAL;
-            float new_value;
+            float currentValue = -MAX_VAL;
+            float newValue;
             foreach (var move in moves)
             {
                 _game.MakeMove(move);
-                new_value = -Search(depth - 1, ply + 1, -beta, -alpha);
+                newValue = -Search(depth - 1, ply + 1, -beta, -alpha);
                 _game.UndoMove(move);
 
-                if (new_value > current_value)
+                if (newValue > currentValue)
                 {
-                    current_value = new_value;
-                    alpha = MathF.Max(current_value, alpha);
+                    currentValue = newValue;
+                    alpha = MathF.Max(currentValue, alpha);
                     if (isRoot)
                         _bestMoveInRoot = move;
                     if (alpha >= beta)
@@ -67,7 +67,7 @@ namespace MastersAlgorithms.Algorithms
                 }
             }
 
-            return current_value;
+            return currentValue;
         }
 
         public string GetDebugInfo()
