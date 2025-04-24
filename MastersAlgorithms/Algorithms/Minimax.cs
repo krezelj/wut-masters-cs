@@ -6,7 +6,7 @@ namespace MastersAlgorithms.Algorithms
 {
     public class Minimax : IAlgorithm
     {
-        private const int MAX_VAL = 10_000;
+        private const int MAX_VAL = 1_000_000;
 
         private long _nodes = 0;
         private int _depth;

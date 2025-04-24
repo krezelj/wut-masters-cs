@@ -19,6 +19,15 @@ namespace MastersAlgorithms.Games
 
     public class BitOthello : IGame
     {
+        private readonly int[] _weights =
+            {100, -20, 10, 5, 5, 10, -20, 100,
+            -20, -50, -2, -2, -2, -2, -50, -20,
+            10, -2, -1, -1, -1, -1, -2, 10,
+            5, -2, -1, -1, -1, -1, -2, 5,
+            5, -2, -1, -1, -1, -1, -2, 5,
+            10, -2, -1, -1, -1, -1, -2, 10,
+            -20, -50, -2, -2, -2, -2, -50, -20,
+            100, -20, 10, 5, 5, 10, -20, 100};
         private const sbyte BLACK = 0;
         private const sbyte WHITE = 1;
         private const sbyte BOARD_SIZE = 8;
@@ -199,20 +208,44 @@ namespace MastersAlgorithms.Games
 
         public float Evaluate()
         {
-            int blackCount = BitOperations.PopCount(_blackBoard);
-            int whiteCount = BitOperations.PopCount(_whiteBoard);
-            float value = blackCount - whiteCount;
+            float value = 0f;
+
+            ulong mask = _blackBoard;
+            while (mask > 0)
+            {
+                value += _weights[mask.PopNextPosition().Index()];
+            }
+            mask = _whiteBoard;
+            while (mask > 0)
+            {
+                value -= _weights[mask.PopNextPosition().Index()];
+            }
 
             if (IsOver)
             {
-                value = MathF.Sign(value);
+                value = MathF.Sign(value) * 1e6f;
             }
-            else
-            {
-                value = value / (BOARD_SIZE * BOARD_SIZE);
-            }
-
+            // else
+            // {
+            //     value = value / (BOARD_SIZE * BOARD_SIZE);
+            // }
             return value * (_player == 0 ? 1 : -1);
+
+
+            // int blackCount = BitOperations.PopCount(_blackBoard);
+            // int whiteCount = BitOperations.PopCount(_whiteBoard);
+            // float value = blackCount - whiteCount;
+
+            // if (IsOver)
+            // {
+            //     value = MathF.Sign(value);
+            // }
+            // else
+            // {
+            //     value = value / (BOARD_SIZE * BOARD_SIZE);
+            // }
+
+            // return value * (_player == 0 ? 1 : -1);
         }
 
         public IGame Copy()
