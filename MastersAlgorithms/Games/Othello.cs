@@ -143,6 +143,12 @@ namespace MastersAlgorithms.Games
             return moves[Utils.RNG.Next(moves.Count)];
         }
 
+        public IMove GetMoveFromString(string m)
+        {
+            // TODO This should return a FULL move includding flip mask
+            throw new NotImplementedException();
+        }
+
         private List<(int, int)> GetCapturesFromPosition(int i, int j)
         {
             List<(int, int)>? captures = new List<(int, int)>(); ;

@@ -21,5 +21,7 @@ namespace MastersAlgorithms.Games
         IGame Copy();
 
         void Display(bool showMoves = true);
+
+        IMove GetMoveFromString(string m);
     }
 }
