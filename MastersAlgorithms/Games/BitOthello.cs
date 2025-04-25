@@ -186,17 +186,22 @@ namespace MastersAlgorithms.Games
             // TODO Get random bit and check if its in perimeter first
         }
 
-        public void SortMoves(ref IMove[] moves)
+        public void SortMoves(ref IMove[] moves, int moveIndex)
         {
             var moveScores = new int[moves.Length];
             for (int i = 0; i < moves.Length; ++i)
             {
+                if (moves[i].Index == moveIndex)
+                {
+                    moveScores[i] = -1_000_000;
+                    continue;
+                }
                 for (int j = 0; j < _weightMasks.Length; ++j)
                 {
                     ulong mask = (moves[i] as BitOthelloMove)!.Position & _weightMasks[j];
                     if (mask > 0)
                     {
-                        moveScores[i] = -_weightValues[j];
+                        moveScores[i] -= _weightValues[j];
                         break;
                     }
                 }

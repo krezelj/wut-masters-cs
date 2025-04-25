@@ -8,7 +8,7 @@ namespace MastersAlgorithms.Algorithms
         private record struct Transposition
         (
             ulong zKey,
-            // IMove move,
+            int moveIndex,
             float evaluation,
             int depth,
             int nodeType
@@ -82,10 +82,10 @@ namespace MastersAlgorithms.Algorithms
             }
 
             var moves = _game.GetMoves();
-            // IMove? currentBestMove = null;
+            int currentBestMoveIndex = -1;
 
             // move ordering
-            _game.SortMoves(ref moves);
+            _game.SortMoves(ref moves, tMatch.moveIndex);
 
             float currentValue = -MAX_VAL;
             float newValue;
@@ -99,7 +99,7 @@ namespace MastersAlgorithms.Algorithms
                 if (newValue > currentValue)
                 {
                     currentValue = newValue;
-                    // currentBestMove = move;
+                    currentBestMoveIndex = move.Index;
                     alpha = MathF.Max(currentValue, alpha);
                     if (isRoot)
                         _bestMoveInRoot = move;
@@ -111,7 +111,7 @@ namespace MastersAlgorithms.Algorithms
 
             tMatch = new(
                 zKey,
-                // currentBestMove!,
+                currentBestMoveIndex,
                 currentValue,
                 depth,
                 currentValue >= beta ? 2 : currentValue <= startAlpha ? 0 : 1);
