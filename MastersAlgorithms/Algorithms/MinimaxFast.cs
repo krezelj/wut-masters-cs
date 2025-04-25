@@ -42,7 +42,12 @@ namespace MastersAlgorithms.Algorithms
             _cacheHits = 0;
             _game = game;
             _sw.Restart();
-            _value = Search(_depth, 0, -MAX_VAL, MAX_VAL);
+
+            for (int currentDepth = 1; currentDepth <= _depth; ++currentDepth)
+            {
+                _value = Search(currentDepth, 0, -MAX_VAL, MAX_VAL);
+            }
+
             _time = _sw.ElapsedMilliseconds;
             if (_verbose)
                 Console.WriteLine(GetDebugInfo());
