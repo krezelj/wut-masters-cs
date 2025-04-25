@@ -324,20 +324,26 @@ namespace MastersAlgorithms.Games
             //     value -= _weights[mask.PopNextPosition().Index()];
             // }
 
+
             float value = 0f;
-            for (int i = 0; i < _weightValues.Length; ++i)
-            {
-                ulong mask = _blackBoard & _weightMasks[i];
-                value += _weightValues[i] * BitOperations.PopCount(mask);
-
-                mask = _whiteBoard & _weightMasks[i];
-                value -= _weightValues[i] * BitOperations.PopCount(mask);
-            }
-
             if (IsOver)
             {
-                value = MathF.Sign(value) * 1e6f;
+                int blackCount = BitOperations.PopCount(_blackBoard);
+                int whiteCount = BitOperations.PopCount(_whiteBoard);
+                value = MathF.Sign(blackCount - whiteCount) * 1e6f;
             }
+            else
+            {
+                for (int i = 0; i < _weightValues.Length; ++i)
+                {
+                    ulong mask = _blackBoard & _weightMasks[i];
+                    value += _weightValues[i] * BitOperations.PopCount(mask);
+
+                    mask = _whiteBoard & _weightMasks[i];
+                    value -= _weightValues[i] * BitOperations.PopCount(mask);
+                }
+            }
+
             return value * (_player == 0 ? 1 : -1);
         }
 
