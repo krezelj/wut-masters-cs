@@ -7,11 +7,16 @@ namespace MastersAlgorithms.Games
         public ulong Position => position;
         public bool IsNull => position == 0;
         public sbyte NullMoves => nullMoves;
-        public ulong FlipMask;
+        public ulong FlipMask = 0;
 
         public static BitOthelloMove NullMove(sbyte nullMoves)
         {
             return new BitOthelloMove(0UL, nullMoves);
+        }
+
+        public override string ToString()
+        {
+            return $"{Index},{nullMoves},{FlipMask}";
         }
     }
 
@@ -75,11 +80,11 @@ namespace MastersAlgorithms.Games
             _whiteBoard = 0UL;
 
             ulong center = BitBoard.GetPosition(BOARD_SIZE / 2 - 1, BOARD_SIZE / 2 - 1);
-            _blackBoard.SetPositions(center);
-            _blackBoard.SetPositions(center << 1 + BOARD_SIZE);
+            _whiteBoard.SetPositions(center);
+            _whiteBoard.SetPositions(center << 1 + BOARD_SIZE);
 
-            _whiteBoard.SetPositions(center << 1);
-            _whiteBoard.SetPositions(center << BOARD_SIZE);
+            _blackBoard.SetPositions(center << 1);
+            _blackBoard.SetPositions(center << BOARD_SIZE);
 
             SetZobristHash();
             _nullMoves = 0;
@@ -159,6 +164,20 @@ namespace MastersAlgorithms.Games
             // TODO Get random bit and check if its in perimeter first
         }
 
+        public IMove GetMoveFromString(string m)
+        {
+            string[] data = m.Split(',');
+            int index = int.Parse(data[0]);
+            sbyte nullMoves = sbyte.Parse(data[1]);
+            if (index < 0)
+                return BitOthelloMove.NullMove(nullMoves);
+
+            ulong position = 1UL << index;
+            BitOthelloMove move = new BitOthelloMove(position, nullMoves);
+            move.FlipMask = ulong.Parse(data[2]);
+            return move;
+        }
+
         private ulong GetCapturesFromPosition(ulong position)
         {
             ulong capturesMask = 0UL;
@@ -193,7 +212,18 @@ namespace MastersAlgorithms.Games
             }
             else
             {
-                ulong flipMask = GetCapturesFromPosition(move.Position);
+                // if the move already has the flip mask set (e.g. if the move
+                // was obtained through GetMoveFromString)
+                // then the mask must be non zero because all non null moves
+                // MUST flip disks, if the flip mask is zero and the move is not null
+                // then it must not have been updated.
+                // This trick is used so as not to add additional flag to BitOthelloMove
+                // such as `isUpdated`.
+                ulong flipMask;
+                if (move.FlipMask == 0)
+                    flipMask = GetCapturesFromPosition(move.Position);
+                else
+                    flipMask = move.FlipMask;
                 _playerBoard.SetPositions(move.Position | flipMask);
                 _opponentBoard.ClearPositions(flipMask);
 
@@ -314,6 +344,34 @@ namespace MastersAlgorithms.Games
                 }
                 Console.WriteLine();
             }
+        }
+
+        public override string ToString()
+        {
+            char[] chars = new char[BOARD_SIZE * BOARD_SIZE + 2];
+
+            ulong tmp = _blackBoard;
+            while (tmp > 0)
+            {
+                int idx = tmp.PopNextPosition().Index();
+                chars[idx] = 'X';
+            }
+            tmp = _whiteBoard;
+            while (tmp > 0)
+            {
+                int idx = tmp.PopNextPosition().Index();
+                chars[idx] = 'O';
+            }
+            tmp = _emptyMask;
+            while (tmp > 0)
+            {
+                int idx = tmp.PopNextPosition().Index();
+                chars[idx] = '.';
+            }
+
+            chars[^2] = (char)(_player + '0');
+            chars[^1] = (char)(_nullMoves + '0');
+            return new string(chars);
         }
     }
 }
