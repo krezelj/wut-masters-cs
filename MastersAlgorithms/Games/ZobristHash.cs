@@ -29,9 +29,10 @@ namespace MastersAlgorithms.Games
 
         public void UpdateKey(int type, ulong positions)
         {
+            ulong[] typeKeys = _keys[type];
             while (positions > 0)
             {
-                _key ^= _keys[type][positions.PopNextPosition().Index()];
+                _key ^= typeKeys[positions.PopNextIndex()];
             }
         }
 

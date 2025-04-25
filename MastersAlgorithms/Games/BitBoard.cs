@@ -76,6 +76,13 @@ namespace MastersAlgorithms.Games
             return 1ul << i;
         }
 
+        public static int PopNextIndex(this ref ulong bitboard)
+        {
+            int i = BitOperations.TrailingZeroCount(bitboard);
+            bitboard &= bitboard - 1;
+            return i;
+        }
+
         public static bool Contains(this ulong bitboard, ulong position)
         {
             return (bitboard & position) > 0;
