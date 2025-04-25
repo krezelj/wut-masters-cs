@@ -203,8 +203,6 @@ namespace MastersAlgorithms.Games
             }
 
             Array.Sort(moveScores, moves);
-
-            // throw new NotImplementedException();
         }
 
         public IMove GetMoveFromString(string m)
@@ -306,17 +304,27 @@ namespace MastersAlgorithms.Games
 
         public float Evaluate()
         {
-            float value = 0f;
+            // float value = 0f;
 
-            ulong mask = _blackBoard;
-            while (mask > 0)
+            // ulong mask = _blackBoard;
+            // while (mask > 0)
+            // {
+            //     value += _weights[mask.PopNextPosition().Index()];
+            // }
+            // mask = _whiteBoard;
+            // while (mask > 0)
+            // {
+            //     value -= _weights[mask.PopNextPosition().Index()];
+            // }
+
+            float value = 0f;
+            for (int i = 0; i < _weightValues.Length; ++i)
             {
-                value += _weights[mask.PopNextPosition().Index()];
-            }
-            mask = _whiteBoard;
-            while (mask > 0)
-            {
-                value -= _weights[mask.PopNextPosition().Index()];
+                ulong mask = _blackBoard & _weightMasks[i];
+                value += _weightValues[i] * BitOperations.PopCount(mask);
+
+                mask = _whiteBoard & _weightMasks[i];
+                value -= _weightValues[i] * BitOperations.PopCount(mask);
             }
 
             if (IsOver)
