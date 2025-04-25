@@ -260,7 +260,7 @@ namespace MastersAlgorithms
                 case "minimax":
                     _algorithms.Add(
                         hashName,
-                        new Minimax(
+                        new MinimaxFast(
                             depth: int.Parse(Get("depth")),
                             verbose: false
                         )
