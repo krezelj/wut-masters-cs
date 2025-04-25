@@ -6,6 +6,7 @@ namespace MastersAlgorithms.Games
         sbyte _nPositions;
 
         ulong[][] _keys;
+        ulong _playerKey;
         ulong _key;
         public ulong Key => _key;
 
@@ -25,15 +26,22 @@ namespace MastersAlgorithms.Games
                     _keys[type][i] = (ulong)rng.NextInt64();
                 }
             }
+            _playerKey = (ulong)rng.NextInt64();
         }
 
-        public void UpdateKey(int type, ulong positions)
+        public void UpdatePosition(int type, ulong positions)
         {
             ulong[] typeKeys = _keys[type];
             while (positions > 0)
             {
                 _key ^= typeKeys[positions.PopNextIndex()];
             }
+        }
+
+        public void UpdatePlayer()
+        {
+            // TODO this assumes 2 players for now
+            _key ^= _playerKey;
         }
 
         public void ResetKey()

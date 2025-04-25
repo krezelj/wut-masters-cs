@@ -128,9 +128,9 @@ namespace MastersAlgorithms.Games
         private void SetZobristHash()
         {
             _zobristHash.ResetKey();
-            _zobristHash.UpdateKey(BLACK, _blackBoard);
-            _zobristHash.UpdateKey(WHITE, _whiteBoard);
-            _zobristHash.UpdateKey(EMPTY, _emptyMask);
+            _zobristHash.UpdatePosition(BLACK, _blackBoard);
+            _zobristHash.UpdatePosition(WHITE, _whiteBoard);
+            _zobristHash.UpdatePosition(EMPTY, _emptyMask);
         }
 
         private bool IsCapturePossible(ulong position)
@@ -274,20 +274,22 @@ namespace MastersAlgorithms.Games
                 _opponentBoard.ClearPositions(flipMask);
 
                 // update zobrist hash
-                _zobristHash.UpdateKey(_player, move.Position | flipMask);
-                _zobristHash.UpdateKey(_opponent, flipMask);
-                _zobristHash.UpdateKey(EMPTY, move.Position);
+                _zobristHash.UpdatePosition(_player, move.Position | flipMask);
+                _zobristHash.UpdatePosition(_opponent, flipMask);
+                _zobristHash.UpdatePosition(EMPTY, move.Position);
 
                 move.FlipMask = flipMask;
                 _nullMoves = 0;
             }
             _player = (sbyte)(1 - _player);
+            _zobristHash.UpdatePlayer();
         }
 
         public void UndoMove(IMove m)
         {
             BitOthelloMove move = (BitOthelloMove)m;
             _player = (sbyte)(1 - _player);
+            _zobristHash.UpdatePlayer();
             if (move.IsNull)
             {
                 --_nullMoves;
@@ -299,9 +301,9 @@ namespace MastersAlgorithms.Games
                 _opponentBoard.SetPositions(move.FlipMask);
 
                 // update zobrist hash
-                _zobristHash.UpdateKey(_player, move.Position | move.FlipMask);
-                _zobristHash.UpdateKey(_opponent, move.FlipMask);
-                _zobristHash.UpdateKey(EMPTY, move.Position);
+                _zobristHash.UpdatePosition(_player, move.Position | move.FlipMask);
+                _zobristHash.UpdatePosition(_opponent, move.FlipMask);
+                _zobristHash.UpdatePosition(EMPTY, move.Position);
 
                 _nullMoves = move.NullMoves;
             }
