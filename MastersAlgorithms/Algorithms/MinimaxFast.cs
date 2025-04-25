@@ -78,6 +78,10 @@ namespace MastersAlgorithms.Algorithms
 
             var moves = _game.GetMoves();
             // IMove? currentBestMove = null;
+
+            // move ordering
+            _game.SortMoves(ref moves);
+
             float currentValue = -MAX_VAL;
             float newValue;
             float startAlpha = alpha;

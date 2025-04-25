@@ -143,6 +143,11 @@ namespace MastersAlgorithms.Games
             return moves[Utils.RNG.Next(moves.Length)];
         }
 
+        public void SortMoves(ref IMove[] moves)
+        {
+            throw new NotImplementedException();
+        }
+
         public IMove GetMoveFromString(string m)
         {
             // TODO This should return a FULL move includding flip mask

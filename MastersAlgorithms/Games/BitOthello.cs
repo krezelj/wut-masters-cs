@@ -33,6 +33,20 @@ namespace MastersAlgorithms.Games
             10, -2, -1, -1, -1, -1, -2, 10,
             -20, -50, -2, -2, -2, -2, -50, -20,
             100, -20, 10, 5, 5, 10, -20, 100};
+
+        private readonly ulong[] _weightMasks = {
+            0b0000000000000000001111000011110000111100001111000000000000000000UL, // -1
+            0b0000000000111100010000100100001001000010010000100011110000000000UL, // -2
+            0b0001100000000000000000001000000110000001000000000000000000011000UL, // 5
+            0b0010010000000000100000010000000000000000100000010000000000100100UL, // 10
+            0b0100001010000001000000000000000000000000000000001000000101000010UL, // -20
+            0b0000000001000010000000000000000000000000000000000100001000000000UL, // -50
+            0b1000000100000000000000000000000000000000000000000000000010000001UL, // 100
+        };
+        private readonly int[] _weightValues = {
+            -1, -2, 5, 10, -20, -50, 100
+        };
+
         private const sbyte BLACK = 0;
         private const sbyte WHITE = 1;
         private const sbyte EMPTY = 2;
@@ -170,6 +184,27 @@ namespace MastersAlgorithms.Games
         {
             throw new NotImplementedException();
             // TODO Get random bit and check if its in perimeter first
+        }
+
+        public void SortMoves(ref IMove[] moves)
+        {
+            var moveScores = new int[moves.Length];
+            for (int i = 0; i < moves.Length; ++i)
+            {
+                for (int j = 0; j < _weightMasks.Length; ++j)
+                {
+                    ulong mask = (moves[i] as BitOthelloMove)!.Position & _weightMasks[j];
+                    if (mask > 0)
+                    {
+                        moveScores[i] = -_weightValues[j];
+                        break;
+                    }
+                }
+            }
+
+            Array.Sort(moveScores, moves);
+
+            // throw new NotImplementedException();
         }
 
         public IMove GetMoveFromString(string m)

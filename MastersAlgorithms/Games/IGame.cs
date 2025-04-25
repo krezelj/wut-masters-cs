@@ -12,6 +12,8 @@ namespace MastersAlgorithms.Games
 
         IMove GetRandomMove();
 
+        void SortMoves(ref IMove[] moves);
+
         void MakeMove(IMove move, bool updateMove = true);
 
         void UndoMove(IMove move);
