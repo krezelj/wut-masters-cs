@@ -101,7 +101,7 @@ namespace MastersAlgorithms.Games
             return false;
         }
 
-        public List<IMove> GetMoves()
+        public IMove[] GetMoves()
         {
             List<OthelloMove> moves = new List<OthelloMove>();
 
@@ -115,7 +115,7 @@ namespace MastersAlgorithms.Games
             }
             if (moves.Count == 0)
                 moves.Add(OthelloMove.NullMove(_nullMoves));
-            return moves.Cast<IMove>().ToList();
+            return moves.Cast<IMove>().ToArray();
         }
 
         public IMove GetRandomMove()
@@ -140,7 +140,7 @@ namespace MastersAlgorithms.Games
             }
 
             var moves = GetMoves();
-            return moves[Utils.RNG.Next(moves.Count)];
+            return moves[Utils.RNG.Next(moves.Length)];
         }
 
         public IMove GetMoveFromString(string m)

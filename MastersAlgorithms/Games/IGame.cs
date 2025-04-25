@@ -8,7 +8,7 @@ namespace MastersAlgorithms.Games
 
         public ulong zKey { get; }
 
-        List<IMove> GetMoves();
+        IMove[] GetMoves();
 
         IMove GetRandomMove();
 

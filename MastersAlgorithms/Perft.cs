@@ -106,19 +106,19 @@ namespace MastersAlgorithms
             var moves1 = _engine1.GetMoves();
             var moves2 = _engine2.GetMoves();
 
-            if (moves1.Count != moves2.Count)
+            if (moves1.Length != moves2.Length)
                 throw new Exception("Moves do not match!");
 
-            moves1.Sort((x, y) => x.Index - y.Index);
-            moves2.Sort((x, y) => x.Index - y.Index);
-            for (int i = 0; i < moves1.Count; i++)
+            Array.Sort(moves1, (x, y) => x.Index - y.Index);
+            Array.Sort(moves2, (x, y) => x.Index - y.Index);
+            for (int i = 0; i < moves1.Length; i++)
             {
                 if (moves1[i].Index != moves2[i].Index)
                     throw new Exception("Moves do not match!");
             }
 
             // theoretically moves match (?)
-            for (int i = 0; i < moves1.Count; i++)
+            for (int i = 0; i < moves1.Length; i++)
             {
                 _engine1.MakeMove(moves1[i]);
                 _engine2.MakeMove(moves2[i]);

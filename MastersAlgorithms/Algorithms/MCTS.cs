@@ -33,7 +33,7 @@ namespace MastersAlgorithms.Algorithms
                 Expanded = true;
                 var moves = Game.GetMoves();
 
-                Children = new Node[moves.Count];
+                Children = new Node[moves.Length];
                 int populated = 0;
                 foreach (var move in moves)
                 {

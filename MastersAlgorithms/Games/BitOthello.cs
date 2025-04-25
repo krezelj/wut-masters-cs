@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace MastersAlgorithms.Games
 {
 
@@ -138,24 +140,30 @@ namespace MastersAlgorithms.Games
             return false;
         }
 
-        public List<IMove> GetMoves()
+        public IMove[] GetMoves()
         {
-            List<BitOthelloMove> moves = new List<BitOthelloMove>();
-
             // empty positions next to opponent discs
             ulong perimeter = _opponentBoard.Expand8() & _emptyMask;
+            ulong moveMask = 0UL;
             while (perimeter > 0)
             {
                 ulong position = perimeter.PopNextPosition();
                 if (IsCapturePossible(position))
                 {
-                    moves.Add(new BitOthelloMove(position, _nullMoves));
+                    moveMask |= position;
                 }
             }
 
-            if (moves.Count == 0)
-                moves.Add(BitOthelloMove.NullMove(_nullMoves));
-            return moves.Cast<IMove>().ToList();
+            if (moveMask == 0)
+                return [BitOthelloMove.NullMove(_nullMoves)];
+
+            var moves = new IMove[BitOperations.PopCount(moveMask)];
+            int i = 0;
+            while (moveMask > 0)
+            {
+                moves[i++] = new BitOthelloMove(moveMask.PopNextPosition(), _nullMoves);
+            }
+            return moves;
         }
 
         public IMove GetRandomMove()
