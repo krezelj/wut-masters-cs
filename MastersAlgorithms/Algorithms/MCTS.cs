@@ -73,8 +73,14 @@ namespace MastersAlgorithms.Algorithms
 
         private bool _verbose;
 
+        private Stopwatch _sw;
+        private float _time;
+        private float _value;
+        private Node? _bestChild;
+
         public MCTS(int maxIters, Func<Node, float> estimator, bool verbose = false)
         {
+            _sw = new Stopwatch();
             _root = null;
             _maxIters = maxIters;
             _estimator = estimator;
@@ -83,19 +89,22 @@ namespace MastersAlgorithms.Algorithms
 
         public IMove GetMove(IGame game)
         {
-            var sw = new Stopwatch();
-            sw.Start();
+            _nodes = 0;
+
+            _sw.Restart();
 
             _root = new Node(game, null);
             _root.Expand();
             BuildTree();
 
             int bestIdx = _root.GetBestChildIndex((Node n) => n.VisitCount);
-            float value = _root.Children![bestIdx].ValueSum / _root.Children[bestIdx].VisitCount;
-            if (_verbose)
-                Console.WriteLine($"Nodes: {_nodes} ({_nodes / (float)sw.ElapsedMilliseconds} kN/s)\tEvaluation: {value}\t");
+            _bestChild = _root.Children![bestIdx];
+            _value = _bestChild.ValueSum / _bestChild.VisitCount;
 
-            _nodes = 0;
+            _time = _sw.ElapsedMilliseconds;
+            if (_verbose)
+                Console.WriteLine(GetDebugInfo());
+
             return game.GetMoves()[bestIdx];
         }
 
@@ -123,6 +132,7 @@ namespace MastersAlgorithms.Algorithms
                 float value = terminalState.Evaluate();
                 if (terminalState.Player == current.Game.Player)
                     value = -value;
+                value = MathF.Sign(value);
 
                 // backtrack
                 Backtrack(current, value);
@@ -165,7 +175,8 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            throw new NotImplementedException();
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,6} | VisitCount {4,6} | Eval {5}",
+                _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount, _value);
         }
 
         #region ESTIMATORS
