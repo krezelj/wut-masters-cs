@@ -235,56 +235,69 @@ namespace MastersAlgorithms
             string gameName = Get("name");
             string state = Get("state", "");
             string hashName = GetHash();
-            switch (gameName)
+            IGame game = GetGameByName(gameName, state);
+            _games.Add(hashName, game);
+            return hashName;
+        }
+
+        private IGame GetGameByName(string name, string state = "")
+        {
+            switch (name)
             {
                 // case "connect-four":
                 //     return new ConnectFour(state);
                 case "othello":
                     if (state != "")
-                        _games.Add(hashName, new BitOthello(state));
+                        return new BitOthello(state);
                     else
-                        _games.Add(hashName, new BitOthello());
-                    break;
+                        return new BitOthello();
                 default:
-                    throw new ArgumentException($"Invalid game name: {gameName}");
+                    throw new ArgumentException($"Invalid game name: {name}");
             }
-            return hashName;
         }
 
         private string AddAlgorithm()
         {
             string algorithmName = Get("name");
             string hashName = GetHash();
-            switch (algorithmName)
+            IAlgorithm algorithm = GetAlgorithmByName(algorithmName);
+            _algorithms.Add(hashName, algorithm);
+            return hashName;
+        }
+
+        private IAlgorithm GetAlgorithmByName(string name)
+        {
+            switch (name)
             {
                 case "minimax":
-                    _algorithms.Add(
-                        hashName,
-                        new MinimaxFast(
-                            depth: int.Parse(Get("depth")),
-                            verbose: false
-                        )
+                    return new MinimaxFast(
+                        depth: int.Parse(Get("depth")),
+                        verbose: false
                     );
-                    break;
                 case "mcts":
-                    _algorithms.Add(
-                        hashName,
-                        new MCTS(
-                            maxIters: int.Parse(Get("maxiters")),
-                            estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
-                            verbose: false
-                        )
+                    return new MCTS(
+                        maxIters: int.Parse(Get("maxiters")),
+                        estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
+                        verbose: false
                     );
-                    break;
                 default:
-                    throw new ArgumentException($"Invalid algorithm name: {algorithmName}");
+                    throw new ArgumentException($"Invalid algorithm name: {name}");
             }
-            return hashName;
         }
 
         private string GetMove()
         {
-            var move = _algorithms[Get("algorithm")].GetMove(_games[Get("game")]);
+            string gameHashName = Get("game", "");
+            IGame game;
+            if (gameHashName != "")
+            {
+                game = _games[Get("game")];
+            }
+            else
+            {
+                game = GetGameByName(Get("name"), Get("state"));
+            }
+            IMove move = _algorithms[Get("algorithm")].GetMove(game)!;
             string debugMsg = _verbose ? _algorithms[Get("algorithm")].GetDebugInfo() : "";
             return $"{move};{debugMsg}";
         }
