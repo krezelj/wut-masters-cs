@@ -88,9 +88,9 @@ namespace MastersAlgorithms.Games
         private ZobristHash _zobristHash;
         public ulong zKey => _zobristHash.Key;
 
-        public BitOthello(int player = BLACK)
+        public BitOthello(sbyte player = BLACK)
         {
-            _zobristHash = new ZobristHash(nTypes: 3, nPositions: BOARD_SIZE * BOARD_SIZE);
+            _player = player;
 
             _blackBoard = 0UL;
             _whiteBoard = 0UL;
@@ -102,11 +102,12 @@ namespace MastersAlgorithms.Games
             _blackBoard.SetPositions(center << 1);
             _blackBoard.SetPositions(center << BOARD_SIZE);
 
+            _zobristHash = new ZobristHash(nTypes: 3, nPositions: BOARD_SIZE * BOARD_SIZE);
             SetZobristHash();
             _nullMoves = 0;
         }
 
-        public BitOthello(string state, int player = BLACK) : this(player)
+        public BitOthello(string state, sbyte player = BLACK) : this(player)
         {
             _blackBoard = 0UL;
             _whiteBoard = 0UL;
@@ -131,6 +132,8 @@ namespace MastersAlgorithms.Games
             _zobristHash.UpdatePosition(BLACK, _blackBoard);
             _zobristHash.UpdatePosition(WHITE, _whiteBoard);
             _zobristHash.UpdatePosition(EMPTY, _emptyMask);
+            if (_player == WHITE)
+                _zobristHash.UpdatePlayer();
         }
 
         private bool IsCapturePossible(ulong position)
@@ -182,8 +185,27 @@ namespace MastersAlgorithms.Games
 
         public IMove GetRandomMove()
         {
-            throw new NotImplementedException();
-            // TODO Get random bit and check if its in perimeter first
+            ulong perimeter = _opponentBoard.Expand8() & _emptyMask;
+
+            while (perimeter > 0)
+            {
+                ulong mask = perimeter;
+                int setBitCount = BitOperations.PopCount(mask);
+                int randomIndex = Utils.RNG.Next(setBitCount);
+
+                for (int i = 0; i <= randomIndex - 1; ++i)
+                {
+                    mask.PopNext();
+                }
+
+                ulong position = mask.PopNextPosition();
+                if (IsCapturePossible(position))
+                    return new BitOthelloMove(position, _nullMoves);
+                perimeter.ClearPositions(position);
+            }
+
+            // all perimeter checks failed -- no valid move
+            return BitOthelloMove.NullMove(_nullMoves);
         }
 
         public void SortMoves(ref IMove[] moves, int moveIndex)

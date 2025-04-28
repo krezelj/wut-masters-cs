@@ -83,6 +83,11 @@ namespace MastersAlgorithms.Games
             return i;
         }
 
+        public static void PopNext(this ref ulong bitboard)
+        {
+            bitboard &= bitboard - 1;
+        }
+
         public static bool Contains(this ulong bitboard, ulong position)
         {
             return (bitboard & position) > 0;
