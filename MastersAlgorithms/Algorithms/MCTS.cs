@@ -93,6 +93,9 @@ namespace MastersAlgorithms.Algorithms
 
             _sw.Restart();
 
+            // zobrist is not used with MCTS but is computationally expensive
+            // so disable it
+            game = game.Copy(disableZobrist: true);
             _root = new Node(game, null);
             _root.Expand();
             BuildTree();

@@ -20,7 +20,7 @@ namespace MastersAlgorithms.Games
 
         float Evaluate();
 
-        IGame Copy();
+        IGame Copy(bool disableZobrist = false);
 
         void Display(bool showMoves = true);
 

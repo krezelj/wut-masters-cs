@@ -295,8 +295,10 @@ namespace MastersAlgorithms.Games
             return value * (_player == 0 ? 1 : -1);
         }
 
-        public IGame Copy()
+        public IGame Copy(bool disableZobrist = false)
         {
+            throw new NotImplementedException(); // TODO handle disableZobrist
+
             Othello newGame = new Othello(_boardSize, _player);
             newGame._nullMoves = _nullMoves;
             newGame._emptyCount = _emptyCount;

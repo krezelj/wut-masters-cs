@@ -248,9 +248,9 @@ namespace MastersAlgorithms
                 //     return new ConnectFour(state);
                 case "othello":
                     if (state != "")
-                        return new BitOthello(state);
+                        return new BitOthello(state, useZobrist: Get("zobrist") == "True");
                     else
-                        return new BitOthello();
+                        return new BitOthello(useZobrist: Get("zobrist") == "True");
                 default:
                     throw new ArgumentException($"Invalid game name: {name}");
             }

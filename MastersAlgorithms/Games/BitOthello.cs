@@ -85,10 +85,11 @@ namespace MastersAlgorithms.Games
         private ulong _emptyMask => (~_whiteBoard) & (~_blackBoard);
         private sbyte _nullMoves;
 
-        private ZobristHash _zobristHash;
-        public ulong zKey => _zobristHash.Key;
+        private bool _useZobrist;
+        private ZobristHash? _zobristHash;
+        public ulong zKey => _useZobrist ? _zobristHash!.Key : throw new Exception("ZobristHash is not used.");
 
-        public BitOthello(sbyte player = BLACK)
+        public BitOthello(sbyte player = BLACK, bool useZobrist = true)
         {
             _player = player;
 
@@ -102,12 +103,16 @@ namespace MastersAlgorithms.Games
             _blackBoard.SetPositions(center << 1);
             _blackBoard.SetPositions(center << BOARD_SIZE);
 
-            _zobristHash = new ZobristHash(nTypes: 3, nPositions: BOARD_SIZE * BOARD_SIZE);
-            SetZobristHash();
+            _useZobrist = useZobrist;
+            if (_useZobrist)
+            {
+                _zobristHash = new ZobristHash(nTypes: 3, nPositions: BOARD_SIZE * BOARD_SIZE);
+                SetZobristHash();
+            }
             _nullMoves = 0;
         }
 
-        public BitOthello(string state, sbyte player = BLACK) : this(player)
+        public BitOthello(string state, sbyte player = BLACK, bool useZobrist = true) : this(player, useZobrist)
         {
             _blackBoard = 0UL;
             _whiteBoard = 0UL;
@@ -123,17 +128,20 @@ namespace MastersAlgorithms.Games
             }
             _player = (sbyte)(state[^2] - '0');
             _nullMoves = (sbyte)(state[^1] - '0');
-            SetZobristHash();
+            if (_useZobrist)
+            {
+                SetZobristHash();
+            }
         }
 
         private void SetZobristHash()
         {
-            _zobristHash.ResetKey();
-            _zobristHash.UpdatePosition(BLACK, _blackBoard);
-            _zobristHash.UpdatePosition(WHITE, _whiteBoard);
-            _zobristHash.UpdatePosition(EMPTY, _emptyMask);
+            _zobristHash!.ResetKey();
+            _zobristHash!.UpdatePosition(BLACK, _blackBoard);
+            _zobristHash!.UpdatePosition(WHITE, _whiteBoard);
+            _zobristHash!.UpdatePosition(EMPTY, _emptyMask);
             if (_player == WHITE)
-                _zobristHash.UpdatePlayer();
+                _zobristHash!.UpdatePlayer();
         }
 
         private bool IsCapturePossible(ulong position)
@@ -296,22 +304,32 @@ namespace MastersAlgorithms.Games
                 _opponentBoard.ClearPositions(flipMask);
 
                 // update zobrist hash
-                _zobristHash.UpdatePosition(_player, move.Position | flipMask);
-                _zobristHash.UpdatePosition(_opponent, flipMask);
-                _zobristHash.UpdatePosition(EMPTY, move.Position);
+                if (_useZobrist)
+                {
+                    _zobristHash!.UpdatePosition(_player, move.Position | flipMask);
+                    _zobristHash!.UpdatePosition(_opponent, flipMask);
+                    _zobristHash!.UpdatePosition(EMPTY, move.Position);
+                }
+
 
                 move.FlipMask = flipMask;
                 _nullMoves = 0;
             }
             _player = (sbyte)(1 - _player);
-            _zobristHash.UpdatePlayer();
+            if (_useZobrist)
+            {
+                _zobristHash!.UpdatePlayer();
+            }
         }
 
         public void UndoMove(IMove m)
         {
             BitOthelloMove move = (BitOthelloMove)m;
             _player = (sbyte)(1 - _player);
-            _zobristHash.UpdatePlayer();
+            if (_useZobrist)
+            {
+                _zobristHash!.UpdatePlayer();
+            }
             if (move.IsNull)
             {
                 --_nullMoves;
@@ -323,9 +341,12 @@ namespace MastersAlgorithms.Games
                 _opponentBoard.SetPositions(move.FlipMask);
 
                 // update zobrist hash
-                _zobristHash.UpdatePosition(_player, move.Position | move.FlipMask);
-                _zobristHash.UpdatePosition(_opponent, move.FlipMask);
-                _zobristHash.UpdatePosition(EMPTY, move.Position);
+                if (_useZobrist)
+                {
+                    _zobristHash!.UpdatePosition(_player, move.Position | move.FlipMask);
+                    _zobristHash!.UpdatePosition(_opponent, move.FlipMask);
+                    _zobristHash!.UpdatePosition(EMPTY, move.Position);
+                }
 
                 _nullMoves = move.NullMoves;
             }
@@ -369,9 +390,11 @@ namespace MastersAlgorithms.Games
             return value * (_player == 0 ? 1 : -1);
         }
 
-        public IGame Copy()
+        public IGame Copy(bool disableZobrist = false)
         {
-            BitOthello newGame = new BitOthello(_player);
+            BitOthello newGame = new BitOthello(
+                player: _player,
+                useZobrist: disableZobrist ? false : _useZobrist);
             newGame._nullMoves = _nullMoves;
             newGame._blackBoard = _blackBoard;
             newGame._whiteBoard = _whiteBoard;
