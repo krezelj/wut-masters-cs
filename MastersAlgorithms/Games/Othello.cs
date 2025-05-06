@@ -299,20 +299,20 @@ namespace MastersAlgorithms.Games
         {
             throw new NotImplementedException(); // TODO handle disableZobrist
 
-            Othello newGame = new Othello(_boardSize, _player);
-            newGame._nullMoves = _nullMoves;
-            newGame._emptyCount = _emptyCount;
+            // Othello newGame = new Othello(_boardSize, _player);
+            // newGame._nullMoves = _nullMoves;
+            // newGame._emptyCount = _emptyCount;
 
-            for (int i = 0; i < _boardSize; ++i)
-            {
-                for (int j = 0; j < _boardSize; ++j)
-                {
-                    newGame._blackBoard[i, j] = _blackBoard[i, j];
-                    newGame._whiteBoard[i, j] = _whiteBoard[i, j];
-                }
-            }
+            // for (int i = 0; i < _boardSize; ++i)
+            // {
+            //     for (int j = 0; j < _boardSize; ++j)
+            //     {
+            //         newGame._blackBoard[i, j] = _blackBoard[i, j];
+            //         newGame._whiteBoard[i, j] = _whiteBoard[i, j];
+            //     }
+            // }
 
-            return newGame;
+            // return newGame;
         }
 
         public void Display(bool showMoves = false)
