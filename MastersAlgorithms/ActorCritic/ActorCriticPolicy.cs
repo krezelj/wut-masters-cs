@@ -26,7 +26,7 @@ namespace MastersAlgorithms.ActorCritic
 
         public float[] GetMaskedProbs(float[] input, bool[] mask)
         {
-            return Utils.MaskedSoftmax(input, mask);
+            return Utils.MaskedSoftmax(GetLogits(input), mask);
         }
 
         public float GetValue(float[] input)

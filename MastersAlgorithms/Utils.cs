@@ -82,10 +82,15 @@ namespace MastersAlgorithms
         {
             int length = input.Length;
             float[] output = new float[length];
-            float max = input.Max();
+            float max = float.MinValue;
+            for (int i = 0; i < length; ++i)
+            {
+                if (mask[i] && input[i] > max)
+                    max = input[i];
+            }
 
             float sum = 0.0f;
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; ++i)
             {
                 if (mask[i])
                 {
@@ -98,11 +103,28 @@ namespace MastersAlgorithms
                 }
             }
 
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; ++i)
             {
                 output[i] /= sum;
             }
             return output;
+        }
+
+        public static int Sample(float[] probs)
+        {
+            float p = RNG.NextSingle();
+            float cumSum = 0.0f;
+
+            for (int i = 0; i < probs.Length; i++)
+            {
+                cumSum += probs[i];
+                if (p <= cumSum)
+                {
+                    return i;
+                }
+            }
+
+            return probs.Length - 1;
         }
     }
 }
