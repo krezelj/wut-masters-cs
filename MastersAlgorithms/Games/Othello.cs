@@ -315,6 +315,16 @@ namespace MastersAlgorithms.Games
             // return newGame;
         }
 
+        public float[] GetObservation(ObservationMode mode = ObservationMode.FLAT)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool[] GetActionMasks(out IMove[] moves)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Display(bool showMoves = false)
         {
             Console.Write("  ");

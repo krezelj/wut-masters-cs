@@ -24,15 +24,15 @@ namespace MastersAlgorithms.Games
 
     public class BitOthello : IGame
     {
-        private readonly int[] _weights =
-            {100, -20, 10, 5, 5, 10, -20, 100,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            10, -2, -1, -1, -1, -1, -2, 10,
-            5, -2, -1, -1, -1, -1, -2, 5,
-            5, -2, -1, -1, -1, -1, -2, 5,
-            10, -2, -1, -1, -1, -1, -2, 10,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            100, -20, 10, 5, 5, 10, -20, 100};
+        // private readonly int[] _weights =
+        //     {100, -20, 10, 5, 5, 10, -20, 100,
+        //     -20, -50, -2, -2, -2, -2, -50, -20,
+        //     10, -2, -1, -1, -1, -1, -2, 10,
+        //     5, -2, -1, -1, -1, -1, -2, 5,
+        //     5, -2, -1, -1, -1, -1, -2, 5,
+        //     10, -2, -1, -1, -1, -1, -2, 10,
+        //     -20, -50, -2, -2, -2, -2, -50, -20,
+        //     100, -20, 10, 5, 5, 10, -20, 100};
 
         private readonly ulong[] _weightMasks = {
             0b0000000000000000001111000011110000111100001111000000000000000000UL, // -1
@@ -399,6 +399,47 @@ namespace MastersAlgorithms.Games
             newGame._blackBoard = _blackBoard;
             newGame._whiteBoard = _whiteBoard;
             return newGame;
+        }
+
+        public float[] GetObservation(ObservationMode mode = ObservationMode.FLAT)
+        {
+            switch (mode)
+            {
+                case ObservationMode.FLAT:
+                    return GetFlatObservation();
+                case ObservationMode.IMAGE:
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private float[] GetFlatObservation()
+        {
+            float[] obs = new float[2 * BOARD_SIZE * BOARD_SIZE];
+            const int offset = BOARD_SIZE * BOARD_SIZE;
+            var mask = _playerBoard;
+            while (mask > 0)
+            {
+                obs[mask.PopNextIndex()] = 1.0f;
+            }
+            mask = _opponentBoard;
+            while (mask > 0)
+            {
+                obs[mask.PopNextIndex() + offset] = 1.0f;
+            }
+            return obs;
+        }
+
+        public bool[] GetActionMasks(out IMove[] moves)
+        {
+            bool[] mask = new bool[65];
+            moves = GetMoves();
+
+            foreach (IMove move in moves)
+            {
+                mask[move.Index] = true;
+            }
+            return mask;
         }
 
         public void Display(bool showMoves = false)

@@ -1,5 +1,7 @@
 namespace MastersAlgorithms.Games
 {
+    public enum ObservationMode { FLAT, IMAGE };
+
     public interface IGame
     {
         public int Player { get; }
@@ -21,6 +23,10 @@ namespace MastersAlgorithms.Games
         float Evaluate();
 
         IGame Copy(bool disableZobrist = false);
+
+        float[] GetObservation(ObservationMode mode = ObservationMode.FLAT);
+
+        bool[] GetActionMasks(out IMove[] moves);
 
         void Display(bool showMoves = true);
 
