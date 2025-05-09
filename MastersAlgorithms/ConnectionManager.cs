@@ -224,6 +224,8 @@ namespace MastersAlgorithms
                     return _games[Get("game")].ToString()!;
                 case "copy":
                     return Copy();
+                case "runGame":
+                    return RunGame();
                 default:
                     throw new ArgumentException($"Unkown Command: {command}");
             }
@@ -332,6 +334,16 @@ namespace MastersAlgorithms
             var gameCopy = _games[Get("game")].Copy();
             _games.Add(hashName, gameCopy);
             return hashName;
+        }
+
+        private string RunGame()
+        {
+            var game = _games[Get("game")];
+            var players = Get("players").Split(";").Select(h => _algorithms[h]).ToArray();
+            int firstPlayerIndex = int.Parse(Get("firstPlayerIdx", "0"));
+            var gameRunner = new GameRunner(game, players, firstPlayerIndex);
+            gameRunner.Run();
+            return gameRunner.GetDebugInfo();
         }
 
     }
