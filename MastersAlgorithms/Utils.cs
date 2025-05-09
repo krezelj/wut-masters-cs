@@ -57,5 +57,52 @@ namespace MastersAlgorithms
         //         yield return (i + diff.di, j + diff.dj);
         //     }
         // }
+
+        public static float[] Softmax(float[] input)
+        {
+            int length = input.Length;
+            float[] output = new float[length];
+            float max = input.Max();
+
+            float sum = 0.0f;
+            for (int i = 0; i < length; i++)
+            {
+                output[i] = MathF.Exp(input[i] - max);
+                sum += output[i];
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                output[i] /= sum;
+            }
+            return output;
+        }
+
+        public static float[] MaskedSoftmax(float[] input, bool[] mask)
+        {
+            int length = input.Length;
+            float[] output = new float[length];
+            float max = input.Max();
+
+            float sum = 0.0f;
+            for (int i = 0; i < length; i++)
+            {
+                if (mask[i])
+                {
+                    output[i] = MathF.Exp(input[i] - max);
+                    sum += output[i];
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                output[i] /= sum;
+            }
+            return output;
+        }
     }
 }
