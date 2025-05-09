@@ -282,6 +282,12 @@ namespace MastersAlgorithms
                         estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
                         verbose: false
                     );
+                case "agent":
+                    return new Agent(
+                        modelDirectory: Get("modelDirectory", Path.Join("models")),
+                        mode: ObservationMode.FLAT, // TODO change this later
+                        deterministic: Get("deterministic") == "True" // TODO Change all Trues like this to `GetSwitch`
+                    );
                 default:
                     throw new ArgumentException($"Invalid algorithm name: {name}");
             }

@@ -18,7 +18,7 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            throw new NotImplementedException();
+            return "Agent DebugInfo not implemented yet";
         }
 
         public IMove? GetMove(IGame game)
