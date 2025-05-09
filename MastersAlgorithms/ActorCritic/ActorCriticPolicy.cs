@@ -1,11 +1,11 @@
 namespace MastersAlgorithms.ActorCritic
 {
-    public class ActorCritic
+    public class ActorCriticPolicy
     {
-        Model Actor;
-        Model Critic;
+        public Model Actor;
+        public Model Critic;
 
-        public ActorCritic(string modelDirectory)
+        public ActorCriticPolicy(string modelDirectory)
         {
             string actor_path = Path.Join(modelDirectory, "actor.onnx");
             string critic_path = Path.Join(modelDirectory, "critic.onnx");
