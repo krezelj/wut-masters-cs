@@ -46,7 +46,17 @@ namespace MastersAlgorithms.Algorithms
 
         private IMove GetDeterministicMove(IGame game)
         {
-            throw new NotImplementedException();
+            var actionMasks = game.GetActionMasks(out IMove[] moves);
+            var probs = Policy.GetMaskedProbs(game.GetObservation(Mode), actionMasks);
+            int idxMax = Utils.ArgMax(probs);
+            for (int i = 0; i < moves.Length; i++)
+            {
+                if (moves[i].Index == idxMax)
+                {
+                    return moves[i];
+                }
+            }
+            throw new Exception($"Sampled index {idxMax} not in valid moves!");
         }
     }
 }

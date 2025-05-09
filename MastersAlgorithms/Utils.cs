@@ -126,5 +126,20 @@ namespace MastersAlgorithms
 
             return probs.Length - 1;
         }
+
+        internal static int ArgMax(float[] input)
+        {
+            float max = float.MinValue;
+            int maxIndex = -1;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] > max)
+                {
+                    max = input[i];
+                    maxIndex = i;
+                }
+            }
+            return maxIndex;
+        }
     }
 }
