@@ -5,7 +5,8 @@ namespace MastersAlgorithms.Games
 
     public class BitOthelloMove(ulong position, sbyte nullMoves) : IMove
     {
-        public int Index => IsNull ? 64 : position.Index();
+        public const int NullIndex = 64;
+        public int Index => IsNull ? NullIndex : position.Index();
         public ulong Position => position;
         public bool IsNull => position == 0;
         public sbyte NullMoves => nullMoves;
@@ -245,7 +246,7 @@ namespace MastersAlgorithms.Games
             string[] data = m.Split(',');
             int index = int.Parse(data[0]);
             sbyte nullMoves = sbyte.Parse(data[1]);
-            if (index < 0)
+            if (index == BitOthelloMove.NullIndex)
                 return BitOthelloMove.NullMove(nullMoves);
 
             ulong position = 1UL << index;
