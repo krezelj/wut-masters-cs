@@ -18,6 +18,7 @@ namespace MastersAlgorithms.Games
 
     public class Othello : IGame
     {
+        public static int PossibleResultsCount => 3;
         private const int BLACK = 0;
         private const int WHITE = 1;
 
@@ -30,6 +31,8 @@ namespace MastersAlgorithms.Games
         private bool _isEmpty(int i, int j) => !_whiteBoard[i, j] && !_blackBoard[i, j];
         private int _emptyCount;
         public bool IsOver => _emptyCount == 0 || _nullMoves == 2;
+
+        public int Result => throw new NotImplementedException();
 
         private bool[,] _blackBoard;
         private bool[,] _whiteBoard;

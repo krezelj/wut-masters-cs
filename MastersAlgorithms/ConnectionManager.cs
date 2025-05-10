@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Text;
 using MastersAlgorithms.Algorithms;
 using MastersAlgorithms.Games;
@@ -226,6 +225,8 @@ namespace MastersAlgorithms
                     return Copy();
                 case "runGame":
                     return RunGame();
+                case "runMatch":
+                    return RunMatch();
                 default:
                     throw new ArgumentException($"Unkown Command: {command}");
             }
@@ -253,6 +254,19 @@ namespace MastersAlgorithms
                         return new BitOthello(state, useZobrist: Get("zobrist") == "True");
                     else
                         return new BitOthello(useZobrist: Get("zobrist") == "True");
+                default:
+                    throw new ArgumentException($"Invalid game name: {name}");
+            }
+        }
+
+        private Type GetGameTypeByName(string name)
+        {
+            switch (name)
+            {
+                // case "connect-four":
+                //     return new ConnectFour(state);
+                case "othello":
+                    return typeof(BitOthello);
                 default:
                     throw new ArgumentException($"Invalid game name: {name}");
             }
@@ -350,6 +364,19 @@ namespace MastersAlgorithms
             var gameRunner = new GameRunner(game, players, firstPlayerIndex);
             gameRunner.Run();
             return gameRunner.GetDebugInfo();
+        }
+
+        private string RunMatch()
+        {
+            var gameType = GetGameTypeByName(Get("gameType"));
+            var players = Get("players").Split(";").Select(h => _algorithms[h]).ToArray();
+            int nGames = int.Parse(Get("nGames"));
+            bool mirrorGames = Get("mirrorGames") == "True";
+            int nRandomMoves = int.Parse(Get("nRandomMoves"));
+
+            var mm = new MatchManager(players, gameType, nGames, mirrorGames, nRandomMoves);
+            mm.Run();
+            return mm.GetDebugInfo();
         }
 
     }

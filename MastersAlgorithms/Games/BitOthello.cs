@@ -25,6 +25,8 @@ namespace MastersAlgorithms.Games
 
     public class BitOthello : IGame
     {
+        public static int PossibleResultsCount => 3;
+
         // private readonly int[] _weights =
         //     {100, -20, 10, 5, 5, 10, -20, 100,
         //     -20, -50, -2, -2, -2, -2, -50, -20,
@@ -59,6 +61,21 @@ namespace MastersAlgorithms.Games
 
         public bool IsOver => _emptyMask == 0 || _nullMoves == 2;
 
+        public int Result
+        {
+            get
+            {
+                if (!IsOver)
+                    return -1;
+                float value = Evaluate();
+                if (value == 0)
+                    return PossibleResultsCount - 1; // draw
+                if (value > 0)
+                    return BLACK; // black won
+                return WHITE; // white won
+            }
+        }
+
         private ulong _blackBoard;
         private ulong _whiteBoard;
 
@@ -89,6 +106,8 @@ namespace MastersAlgorithms.Games
         private bool _useZobrist;
         private ZobristHash? _zobristHash;
         public ulong zKey => _useZobrist ? _zobristHash!.Key : throw new Exception("ZobristHash is not used.");
+
+        public BitOthello() : this(BLACK, true) { } // dummy parameterless constructor;
 
         public BitOthello(sbyte player = BLACK, bool useZobrist = true)
         {
