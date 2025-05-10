@@ -188,7 +188,15 @@ namespace MastersAlgorithms.Algorithms
                 rolloutValue = MathF.Sign(rolloutValue);
             }
 
-            float estimatorValue = _valueEstimator(leaf.Game);
+            float estimatorValue;
+            if (_lambda == 1.0f)
+            {
+                estimatorValue = 0.0f;
+            }
+            else
+            {
+                estimatorValue = _valueEstimator(leaf.Game);
+            }
             float value = (1.0f - _lambda) * estimatorValue + _lambda * rolloutValue;
             return value;
         }
@@ -254,8 +262,9 @@ namespace MastersAlgorithms.Algorithms
         }
 
         public static MCTSHybrid GetAgentMCTS(
-            int maxIters, AgentController ac, float lambda = 0.5f, bool useRandomRollout = false)
+            int maxIters, Agent agent, float lambda = 0.5f, float c = 5f, bool useRandomRollout = false)
         {
+            AgentController ac = new AgentController(agent, c);
             return new MCTSHybrid(
                 maxIters: maxIters,
                 simulationPolicy: ac.SimulationPolicy,
