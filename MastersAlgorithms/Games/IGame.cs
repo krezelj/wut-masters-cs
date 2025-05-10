@@ -5,6 +5,8 @@ namespace MastersAlgorithms.Games
     public interface IGame
     {
         static virtual int PossibleResultsCount { get; }
+
+        public int PossibleMovesCount { get; }
         public int Player { get; }
 
         bool IsOver { get; }

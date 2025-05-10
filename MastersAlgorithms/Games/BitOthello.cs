@@ -26,6 +26,7 @@ namespace MastersAlgorithms.Games
     public class BitOthello : IGame
     {
         public static int PossibleResultsCount => 3;
+        public int PossibleMovesCount => BOARD_SIZE * BOARD_SIZE + 1;
 
         // private readonly int[] _weights =
         //     {100, -20, 10, 5, 5, 10, -20, 100,

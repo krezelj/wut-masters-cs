@@ -19,6 +19,7 @@ namespace MastersAlgorithms.Games
     public class Othello : IGame
     {
         public static int PossibleResultsCount => 3;
+        public int PossibleMovesCount => _boardSize * _boardSize + 1;
         private const int BLACK = 0;
         private const int WHITE = 1;
 

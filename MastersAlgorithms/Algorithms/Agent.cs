@@ -29,7 +29,7 @@ namespace MastersAlgorithms.Algorithms
                 return GetStochasticMove(game);
         }
 
-        private IMove GetStochasticMove(IGame game)
+        public IMove GetStochasticMove(IGame game)
         {
             var actionMasks = game.GetActionMasks(out IMove[] moves);
             var probs = Policy.GetMaskedProbs(game.GetObservation(Mode), actionMasks);
@@ -44,7 +44,7 @@ namespace MastersAlgorithms.Algorithms
             throw new Exception($"Sampled index {sampledIndex} not in valid moves!");
         }
 
-        private IMove GetDeterministicMove(IGame game)
+        public IMove GetDeterministicMove(IGame game)
         {
             var actionMasks = game.GetActionMasks(out IMove[] moves);
             var probs = Policy.GetMaskedProbs(game.GetObservation(Mode), actionMasks);
