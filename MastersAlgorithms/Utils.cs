@@ -58,55 +58,78 @@ namespace MastersAlgorithms
         //     }
         // }
 
-        public static float[] Softmax(float[] input)
+        public static float[] Softmax(float[] input, int batchCount = 1)
         {
             int length = input.Length;
+            int batchLength = length / batchCount;
             float[] output = new float[length];
-            float max = input.Max();
 
-            float sum = 0.0f;
-            for (int i = 0; i < length; i++)
+            for (int b = 0; b < batchCount; b++)
             {
-                output[i] = MathF.Exp(input[i] - max);
-                sum += output[i];
-            }
+                int start = b * batchLength;
+                int end = start + batchLength;
 
-            for (int i = 0; i < length; i++)
-            {
-                output[i] /= sum;
-            }
-            return output;
-        }
+                float max = float.MinValue;
+                for (int i = start; i < end; i++)
+                {
+                    if (input[i] > max)
+                        max = input[i];
+                }
 
-        public static float[] MaskedSoftmax(float[] input, bool[] mask)
-        {
-            int length = input.Length;
-            float[] output = new float[length];
-            float max = float.MinValue;
-            for (int i = 0; i < length; ++i)
-            {
-                if (mask[i] && input[i] > max)
-                    max = input[i];
-            }
-
-            float sum = 0.0f;
-            for (int i = 0; i < length; ++i)
-            {
-                if (mask[i])
+                float sum = 0.0f;
+                for (int i = start; i < end; i++)
                 {
                     output[i] = MathF.Exp(input[i] - max);
                     sum += output[i];
                 }
-                else
+
+                for (int i = start; i < end; i++)
                 {
-                    output[i] = 0;
+                    output[i] /= sum;
                 }
             }
 
-            for (int i = 0; i < length; ++i)
+            return output;
+        }
+
+        public static float[] MaskedSoftmax(float[] input, bool[] mask, int batchCount = 1)
+        {
+            int length = input.Length;
+            int batchLength = length / batchCount;
+            float[] output = new float[length];
+
+            for (int b = 0; b < batchCount; b++)
             {
-                output[i] /= sum;
+                int start = b * batchLength;
+                int end = start + batchLength;
+
+                float max = float.MinValue;
+                for (int i = start; i < end; i++)
+                {
+                    if (mask[i] && input[i] > max)
+                        max = input[i];
+                }
+
+                float sum = 0.0f;
+                for (int i = start; i < end; i++)
+                {
+                    if (mask[i])
+                    {
+                        output[i] = MathF.Exp(input[i] - max);
+                        sum += output[i];
+                    }
+                    else
+                    {
+                        output[i] = 0;
+                    }
+                }
+
+                for (int i = start; i < end; i++)
+                {
+                    output[i] /= sum;
+                }
             }
+
             return output;
         }
 

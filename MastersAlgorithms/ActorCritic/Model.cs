@@ -13,9 +13,9 @@ namespace MastersAlgorithms.ActorCritic
             _session = new InferenceSession(pathToModel);
         }
 
-        public float[] Forward(float[] input)
+        public float[] Forward(float[] input, int batchCount = 1)
         {
-            var tensorInput = new DenseTensor<float>(input, [1, input.Length]);
+            var tensorInput = new DenseTensor<float>(input, [batchCount, input.Length / batchCount]);
             var namedInput = new List<NamedOnnxValue>
             {
                 NamedOnnxValue.CreateFromTensor("input", tensorInput)

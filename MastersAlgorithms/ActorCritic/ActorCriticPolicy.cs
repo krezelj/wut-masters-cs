@@ -14,24 +14,24 @@ namespace MastersAlgorithms.ActorCritic
             Critic = new Model(critic_path);
         }
 
-        public float[] GetLogits(float[] input)
+        public float[] GetLogits(float[] input, int batchCount = 1)
         {
-            return Actor.Forward(input);
+            return Actor.Forward(input, batchCount);
         }
 
-        public float[] GetProbs(float[] input)
+        public float[] GetProbs(float[] input, int batchCount = 1)
         {
-            return Utils.Softmax(GetLogits(input));
+            return Utils.Softmax(GetLogits(input, batchCount), batchCount);
         }
 
-        public float[] GetMaskedProbs(float[] input, bool[] mask)
+        public float[] GetMaskedProbs(float[] input, bool[] mask, int batchCount = 1)
         {
-            return Utils.MaskedSoftmax(GetLogits(input), mask);
+            return Utils.MaskedSoftmax(GetLogits(input, batchCount), mask, batchCount);
         }
 
-        public float GetValue(float[] input)
+        public float[] GetValue(float[] input, int batchCount = 1)
         {
-            return Critic.Forward(input)[0];
+            return Critic.Forward(input, batchCount);
         }
     }
 }
