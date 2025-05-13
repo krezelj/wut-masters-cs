@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using MathNet.Numerics.Random;
 
 namespace MastersAlgorithms
 {
     public static class Utils
     {
         public static Random RNG;
+        public static MersenneTwister mTwister;
 
         static Utils()
         {
             RNG = new Random(0);
+            mTwister = new MersenneTwister(0);
         }
 
         public static void SetRNGSeed(int seed)
         {
             RNG = new Random(seed);
+            mTwister = new MersenneTwister(seed);
         }
 
         public static bool InLimits(int i, int j, int width, int height)

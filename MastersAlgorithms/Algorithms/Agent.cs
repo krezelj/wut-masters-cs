@@ -8,21 +8,28 @@ namespace MastersAlgorithms.Algorithms
         public ActorCriticPolicy Policy;
         public ObservationMode Mode;
         public bool Deterministic;
+        private IGame? _game;
+        private bool _verbose;
 
-        public Agent(string modelDirectory, ObservationMode mode, bool deterministic)
+        public Agent(string modelDirectory, ObservationMode mode, bool deterministic, bool verbose = false)
         {
             Policy = new ActorCriticPolicy(modelDirectory);
             Mode = mode;
             Deterministic = deterministic;
+            _verbose = verbose;
         }
 
         public string GetDebugInfo()
         {
-            return "Agent DebugInfo not implemented yet";
+            float value = Policy.GetValue(_game!.GetObservation(Mode))[0];
+            return string.Format("Eval {0,5:F3}", value);
         }
 
         public IMove? GetMove(IGame game)
         {
+            _game = game;
+            if (_verbose)
+                Console.WriteLine(GetDebugInfo());
             if (Deterministic)
                 return GetDeterministicMove(game);
             else

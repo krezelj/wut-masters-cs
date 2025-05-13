@@ -197,7 +197,7 @@ namespace MastersAlgorithms.Algorithms
             }
             else
             {
-                estimatorValue = _valueEstimator(leaf.Game);
+                estimatorValue = -_valueEstimator(leaf.Game);
             }
             float value = (1.0f - _lambda) * estimatorValue + _lambda * rolloutValue;
             return value;
@@ -227,7 +227,7 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,6} | VisitCount {4,6} | Eval {5}",
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,6:F3} | VisitCount {4,6} | Eval {5}",
                 _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount, _value);
         }
 
@@ -247,7 +247,7 @@ namespace MastersAlgorithms.Algorithms
             return game.GetRandomMove();
         }
 
-        public static MCTSHybrid GetDefaultMCTS(int maxIters)
+        public static MCTSHybrid GetDefaultMCTS(int maxIters, bool verbose = false)
         {
             return new MCTSHybrid(
                 maxIters: maxIters,
@@ -259,12 +259,18 @@ namespace MastersAlgorithms.Algorithms
                 },
                 rolloutPolicy: RandomRollout,
                 valueEstimator: g => 0.0f,
-                lambda: 1.0f
+                lambda: 1.0f,
+                verbose: verbose
             );
         }
 
         public static MCTSHybrid GetAgentMCTS(
-            int maxIters, Agent agent, float lambda = 0.5f, float c = 5f, bool useRandomRollout = false)
+            int maxIters,
+            Agent agent,
+            float lambda = 0.5f,
+            float c = 5f,
+            bool useRandomRollout = false,
+            bool verbose = false)
         {
             AgentController ac = new AgentController(agent, c);
             return new MCTSHybrid(
@@ -273,7 +279,8 @@ namespace MastersAlgorithms.Algorithms
                 priorFunc: ac.PriorFunc,
                 rolloutPolicy: useRandomRollout ? RandomRollout : ac.RolloutPolicy,
                 valueEstimator: ac.ValueEstimator,
-                lambda: lambda
+                lambda: lambda,
+                verbose: verbose
             );
         }
 
@@ -297,7 +304,7 @@ namespace MastersAlgorithms.Algorithms
         public float SimulationPolicy(MCTSHybrid.Node node)
         {
             float Q = node.ValueSum / (node.VisitCount + 1);
-            float U = _c * node.PriorProbability * MathF.Sqrt(node.Parent!.VisitCount / (1 + node.VisitCount));
+            float U = _c * node.PriorProbability * MathF.Sqrt(node.Parent!.VisitCount) / (1 + node.VisitCount);
             return Q + U;
         }
 

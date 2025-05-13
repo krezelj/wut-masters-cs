@@ -10,7 +10,8 @@ namespace MastersAlgorithms.ActorCritic
 
         public Model(string pathToModel)
         {
-            _session = new InferenceSession(pathToModel);
+            using var gpuSessionOptions = SessionOptions.MakeSessionOptionWithCudaProvider(0);
+            _session = new InferenceSession(pathToModel, gpuSessionOptions);
         }
 
         public float[] Forward(float[] input, int batchCount = 1)
