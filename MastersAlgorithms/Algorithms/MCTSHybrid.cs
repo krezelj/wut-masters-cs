@@ -20,9 +20,9 @@ namespace MastersAlgorithms.Algorithms
             public int VisitCount;
             public float ValueSum;
 
-            public float PriorProbabiltiy;
+            public float PriorProbability;
 
-            public Node(IGame game, Node? parent, float priorProbabiltiy)
+            public Node(IGame game, Node? parent, float priorProbability)
             {
                 Game = game;
                 Parent = parent;
@@ -30,7 +30,7 @@ namespace MastersAlgorithms.Algorithms
                 Expanded = false;
                 VisitCount = 0;
                 ValueSum = 0;
-                PriorProbabiltiy = priorProbabiltiy;
+                PriorProbability = priorProbability;
             }
 
             public void Expand(Func<IGame, (float[], IMove[])> priorFunc)
@@ -295,7 +295,7 @@ namespace MastersAlgorithms.Algorithms
         public float SimulationPolicy(MCTSHybrid.Node node)
         {
             float Q = node.ValueSum / (node.VisitCount + 1);
-            float U = _c * node.PriorProbabiltiy * MathF.Sqrt(node.Parent!.VisitCount / (1 + node.VisitCount));
+            float U = _c * node.PriorProbability * MathF.Sqrt(node.Parent!.VisitCount / (1 + node.VisitCount));
             return Q + U;
         }
 
