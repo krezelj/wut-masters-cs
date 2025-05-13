@@ -132,7 +132,7 @@ namespace MastersAlgorithms.Algorithms
             return game.GetMoves()[bestIdx];
         }
 
-        public void BuildTree()
+        private void BuildTree()
         {
             for (int iter = 0; iter < _maxIters; iter++)
             {
