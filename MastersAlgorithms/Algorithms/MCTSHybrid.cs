@@ -167,6 +167,8 @@ namespace MastersAlgorithms.Algorithms
                 _nodes++;
                 current.VisitCount++;
                 current = current.GetBestChild(_simulationPolicy);
+                if (current.IsTerminal)
+                    break;
             }
             current.VisitCount++;
             return current;
