@@ -38,7 +38,7 @@ namespace MastersAlgorithms.Games
         //     -20, -50, -2, -2, -2, -2, -50, -20,
         //     100, -20, 10, 5, 5, 10, -20, 100};
 
-        private readonly ulong[] _weightMasks = {
+        private static readonly ulong[] _weightMasks = {
             0b0000000000000000001111000011110000111100001111000000000000000000UL, // -1
             0b0000000000111100010000100100001001000010010000100011110000000000UL, // -2
             0b0001100000000000000000001000000110000001000000000000000000011000UL, // 5
@@ -47,7 +47,7 @@ namespace MastersAlgorithms.Games
             0b0000000001000010000000000000000000000000000000000100001000000000UL, // -50
             0b1000000100000000000000000000000000000000000000000000000010000001UL, // 100
         };
-        private readonly int[] _weightValues = {
+        private static readonly int[] _weightValues = {
             -1, -2, 5, 10, -20, -50, 100
         };
 
