@@ -9,6 +9,7 @@ namespace MastersAlgorithms.Algorithms
         public ObservationMode Mode;
         public bool Deterministic;
         public string Device;
+        public int ExpectedBatchCount;
         private IGame? _game;
         private bool _verbose;
 
@@ -17,10 +18,12 @@ namespace MastersAlgorithms.Algorithms
             ObservationMode mode,
             bool deterministic,
             string device = "cpu",
+            int expectedBatchCount = 1,
             bool verbose = false)
         {
             Device = device;
-            Policy = new ActorCriticPolicy(modelDirectory, Device);
+            ExpectedBatchCount = expectedBatchCount;
+            Policy = new ActorCriticPolicy(modelDirectory, Device, ExpectedBatchCount);
             Mode = mode;
             Deterministic = deterministic;
             _verbose = verbose;

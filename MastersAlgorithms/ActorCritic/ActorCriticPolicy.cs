@@ -5,15 +5,17 @@ namespace MastersAlgorithms.ActorCritic
         public Model Actor;
         public Model Critic;
         public string Device;
+        public int ExpectedBatchCount;
 
-        public ActorCriticPolicy(string modelDirectory, string device = "cpu")
+        public ActorCriticPolicy(string modelDirectory, string device = "cpu", int expectedBatchCount = 1)
         {
             string actor_path = Path.Join(modelDirectory, "actor.onnx");
             string critic_path = Path.Join(modelDirectory, "critic.onnx");
 
             Device = device;
-            Actor = new Model(actor_path, Device);
-            Critic = new Model(critic_path, Device);
+            ExpectedBatchCount = expectedBatchCount;
+            Actor = new Model(actor_path, Device, ExpectedBatchCount);
+            Critic = new Model(critic_path, Device, ExpectedBatchCount);
         }
 
         public float[] GetLogits(float[] input, int batchCount = 1)

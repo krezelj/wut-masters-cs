@@ -7,6 +7,7 @@ namespace MastersAlgorithms.ActorCritic
     {
         private InferenceSession _session;
         public string Device;
+        public int ExpectedBatchCount;
         private int[] _inputDimensions;
         private int[] _outputDimensions;
         private float[] _bufferInput;
@@ -16,9 +17,10 @@ namespace MastersAlgorithms.ActorCritic
         FixedBufferOnnxValue[] _inputValues;
         FixedBufferOnnxValue[] _outputValues;
 
-        public Model(string pathToModel, string device = "cpu")
+        public Model(string pathToModel, string device = "cpu", int expectedBatchCount = 1)
         {
             Device = device;
+            ExpectedBatchCount = expectedBatchCount;
             switch (Device)
             {
                 case "cuda":
@@ -42,10 +44,12 @@ namespace MastersAlgorithms.ActorCritic
             _outputNames = outputMetadata.Keys.ToArray();
             _outputDimensions = outputMetadata[_outputNames[0]].Dimensions.ToArray();
 
-            _bufferInput = new float[_inputDimensions[1]];
-            _bufferOutput = new float[_outputDimensions[1]];
-            var tensorInput = new DenseTensor<float>(_bufferInput, [1, _bufferInput.Length]);
-            var tensorOutput = new DenseTensor<float>(_bufferOutput, [1, _bufferOutput.Length]);
+            _bufferInput = new float[_inputDimensions[1] * ExpectedBatchCount];
+            _bufferOutput = new float[_outputDimensions[1] * ExpectedBatchCount];
+            var tensorInput = new DenseTensor<float>(
+                _bufferInput, [ExpectedBatchCount, _bufferInput.Length / ExpectedBatchCount]);
+            var tensorOutput = new DenseTensor<float>(
+                _bufferOutput, [ExpectedBatchCount, _bufferOutput.Length / ExpectedBatchCount]);
 
             FixedBufferOnnxValue valueInput = FixedBufferOnnxValue.CreateFromTensor(tensorInput);
             FixedBufferOnnxValue valueOutput = FixedBufferOnnxValue.CreateFromTensor(tensorOutput);
@@ -56,7 +60,7 @@ namespace MastersAlgorithms.ActorCritic
 
         public float[] Forward(float[] input, int batchCount = 1)
         {
-            if (batchCount == 1)
+            if (batchCount == ExpectedBatchCount)
                 return BufferedInference(input);
 
             var tensorInput = new DenseTensor<float>(input, [batchCount, input.Length / batchCount]);
