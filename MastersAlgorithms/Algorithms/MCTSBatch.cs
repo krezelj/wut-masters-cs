@@ -90,7 +90,7 @@ namespace MastersAlgorithms.Algorithms
             Func<IGame[], (float[][], IMove[][])> priorFunc,
             Func<IGame, IMove> rolloutPolicy,
             Func<IGame[], float[]> valueEstimator,
-            int batchSize = 8,
+            int batchSize = 1,
             float lambda = 0.5f,
             float noiseAlpha = 0.9f,
             float noiseWeight = 0.25f,
@@ -199,32 +199,29 @@ namespace MastersAlgorithms.Algorithms
 
         private float[] Evaluate(Node[] nodeBatch, IGame[] stateBatch)
         {
-            float[] values = _valueEstimator(stateBatch);
-            for (int i = 0; i < values.Length; i++)
-                values[i] = -values[i];
+            float[] rolloutValues = new float[nodeBatch.Length];
+            if (_lambda > 0)
+            {
+                for (int i = 0; i < _batchSize; i++)
+                {
+                    IGame terminalState = Rollout(nodeBatch[i].Game.Copy());
+                    float rolloutValue = terminalState.Evaluate();
+                    if (terminalState.Player == nodeBatch[i].Game.Player)
+                        rolloutValue = -rolloutValue;
+                    rolloutValues[i] = MathF.Sign(rolloutValue);
+                }
+            }
+
+            float[] valueEstimates = new float[nodeBatch.Length];
+            if (_lambda < 1.0f)
+                valueEstimates = _valueEstimator(stateBatch);
+
+            float[] values = new float[nodeBatch.Length];
+            for (int i = 0; i < _batchSize; i++)
+            {
+                values[i] = (1.0f - _lambda) * -valueEstimates[i] + _lambda * rolloutValues[i];
+            }
             return values;
-
-            // float[] rolloutValues = new float[nodeBatch.Length];
-            // if (_lambda > 0)
-            // {
-            //     for (int i = 0; i < _batchSize; i++)
-            //     {
-            //         IGame terminalState = Rollout(nodeBatch[i].Game.Copy());
-            //         float rolloutValue = terminalState.Evaluate();
-            //         if (terminalState.Player == nodeBatch[i].Game.Player)
-            //             rolloutValue = -rolloutValue;
-            //         rolloutValues[i] = MathF.Sign(rolloutValue);
-            //     }
-            // }
-
-            // float[] valueEstimates = _valueEstimator(stateBatch);
-            // float[] values = new float[nodeBatch.Length];
-
-            // for (int i = 0; i < _batchSize; i++)
-            // {
-            //     values[i] = (1.0f - _lambda) * valueEstimates[i] + _lambda * rolloutValues[i];
-            // }
-            // return values;
             // // TODO include rollout
         }
 
