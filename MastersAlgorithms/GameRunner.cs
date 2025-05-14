@@ -49,7 +49,11 @@ namespace MastersAlgorithms
 
         public string GetDebugInfo()
         {
-            return "GameRunner DebugInfo not implemented yet";
+            var meanTimes = string.Join(",",
+                Enumerable.Range(0, Players.Length).
+                Select(i => PlayerTimes[i] / (PlayerMoveCount[i] * Stopwatch.Frequency) * 1000)
+            );
+            return meanTimes;
         }
 
     }

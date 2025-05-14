@@ -47,7 +47,7 @@ namespace MastersAlgorithms
 
         public string GetDebugInfo()
         {
-            var meanTimes = string.Join(";",
+            var meanTimes = string.Join(",",
                 Enumerable.Range(0, Players.Length).
                 Select(i => PlayerTimes[i] / (PlayerMoveCount[i] * Stopwatch.Frequency) * 1000)
             );
