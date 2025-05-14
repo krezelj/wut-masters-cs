@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace MastersAlgorithms
         public bool MirrorGames;
         public int NRandomMoves;
         public int[,] Results;
+        public float[] PlayerTimes;
+        public int[] PlayerMoveCount;
 
         public MatchManager(
             IAlgorithm[] players,
@@ -36,14 +39,21 @@ namespace MastersAlgorithms
             MirrorGames = mirrorGames;
             NRandomMoves = nRandomMoves;
 
-            // BindingFlags.Static | BindingFlags.Public
             int possibleResultsCount = (int)GameType.GetProperty("PossibleResultsCount")!.GetValue(null)!;
             Results = new int[possibleResultsCount, Players.Length];
+            PlayerTimes = new float[players.Length];
+            PlayerMoveCount = new int[players.Length];
         }
 
         public string GetDebugInfo()
         {
-            return string.Join(",", Results.Cast<int>().ToArray());
+            var meanTimes = string.Join(";",
+                Enumerable.Range(0, Players.Length).
+                Select(i => PlayerTimes[i] / (PlayerMoveCount[i] * Stopwatch.Frequency) * 1000)
+            );
+            return meanTimes;
+            // var strResults = string.Join(",", Results.Cast<int>().ToArray());
+            // return $"{meanTimes},{strResults}";
         }
 
         public void Run()
@@ -55,6 +65,11 @@ namespace MastersAlgorithms
                     firstPlayerIndex = (firstPlayerIndex + 1) % Players.Length;
                 var gameRunner = new GameRunner(gameData.Game, Players, firstPlayerIndex);
                 gameRunner.Run();
+                for (int i = 0; i < Players.Length; i++)
+                {
+                    PlayerTimes[i] += gameRunner.PlayerTimes[i];
+                    PlayerMoveCount[i] += gameRunner.PlayerMoveCount[i];
+                }
                 ++Results[gameData.Game.Result, firstPlayerIndex];
             }
         }
