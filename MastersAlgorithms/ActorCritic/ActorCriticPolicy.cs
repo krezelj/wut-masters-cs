@@ -4,14 +4,16 @@ namespace MastersAlgorithms.ActorCritic
     {
         public Model Actor;
         public Model Critic;
+        public string Device;
 
-        public ActorCriticPolicy(string modelDirectory)
+        public ActorCriticPolicy(string modelDirectory, string device = "cpu")
         {
             string actor_path = Path.Join(modelDirectory, "actor.onnx");
             string critic_path = Path.Join(modelDirectory, "critic.onnx");
 
-            Actor = new Model(actor_path);
-            Critic = new Model(critic_path);
+            Device = device;
+            Actor = new Model(actor_path, Device);
+            Critic = new Model(critic_path, Device);
         }
 
         public float[] GetLogits(float[] input, int batchCount = 1)

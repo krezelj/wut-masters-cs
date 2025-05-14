@@ -8,12 +8,19 @@ namespace MastersAlgorithms.Algorithms
         public ActorCriticPolicy Policy;
         public ObservationMode Mode;
         public bool Deterministic;
+        public string Device;
         private IGame? _game;
         private bool _verbose;
 
-        public Agent(string modelDirectory, ObservationMode mode, bool deterministic, bool verbose = false)
+        public Agent(
+            string modelDirectory,
+            ObservationMode mode,
+            bool deterministic,
+            string device = "cpu",
+            bool verbose = false)
         {
-            Policy = new ActorCriticPolicy(modelDirectory);
+            Device = device;
+            Policy = new ActorCriticPolicy(modelDirectory, Device);
             Mode = mode;
             Deterministic = deterministic;
             _verbose = verbose;
