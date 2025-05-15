@@ -291,11 +291,12 @@ namespace MastersAlgorithms
                         verbose: false
                     );
                 case "mcts":
-                    return new MCTS(
-                        maxIters: int.Parse(Get("maxiters")),
-                        estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
-                        verbose: false
-                    );
+                    throw new NotImplementedException();
+                // return new MCTS(
+                //     maxIters: int.Parse(Get("maxiters")),
+                //     estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
+                //     verbose: false
+                // );
                 case "agent":
                     return new Agent(
                         modelDirectory: Get("modelDirectory", Path.Join("models")),
