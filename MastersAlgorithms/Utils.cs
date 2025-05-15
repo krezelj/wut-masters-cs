@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 
 namespace MastersAlgorithms
@@ -154,7 +155,7 @@ namespace MastersAlgorithms
             return probs.Length - 1;
         }
 
-        internal static int ArgMax(float[] input)
+        public static int ArgMax(float[] input)
         {
             float max = float.MinValue;
             int maxIndex = -1;
@@ -167,6 +168,24 @@ namespace MastersAlgorithms
                 }
             }
             return maxIndex;
+        }
+
+        public static float[] AddDirichletNoise(float[] values, float noiseAlpha, float noiseWeight)
+        {
+            int valueCount = values.Length;
+            float[] noisyValues = new float[valueCount];
+
+            double[] alpha = new double[valueCount];
+            for (int i = 0; i < valueCount; i++)
+                alpha[i] = noiseAlpha;
+
+            var dirichlet = new Dirichlet(alpha, Utils.mTwister);
+            double[] sample = dirichlet.Sample();
+
+            for (int i = 0; i < valueCount; i++)
+                noisyValues[i] = (float)((1 - noiseWeight) * values[i] + noiseWeight * sample[i]);
+
+            return noisyValues;
         }
     }
 }

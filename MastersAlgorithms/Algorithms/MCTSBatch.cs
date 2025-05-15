@@ -129,7 +129,7 @@ namespace MastersAlgorithms.Algorithms
 
             _root = new Node(game);
             (var probs, var moves) = _priorFunc([_root.Game]);
-            var noisyProbs = AddNoise(probs[0]);
+            var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight);
             _root.Expand(noisyProbs, moves[0]);
             // _root.Expand(probs[0], moves[0]);
             _root.VisitCount++;
@@ -264,24 +264,6 @@ namespace MastersAlgorithms.Algorithms
                 stateBatch[i] = nodeBatch[i].Game;
             }
             return stateBatch;
-        }
-
-        private float[] AddNoise(float[] values)
-        {
-            int valueCount = values.Length;
-            float[] noisyValues = new float[valueCount];
-
-            double[] alpha = new double[valueCount];
-            for (int i = 0; i < valueCount; i++)
-                alpha[i] = _noiseAlpha;
-
-            var dirichlet = new Dirichlet(alpha, Utils.mTwister);
-            double[] sample = dirichlet.Sample();
-
-            for (int i = 0; i < valueCount; i++)
-                noisyValues[i] = (float)((1 - _noiseWeight) * values[i] + _noiseWeight * sample[i]);
-
-            return noisyValues;
         }
 
         public static MCTSBatch GetAgentMCTS(
