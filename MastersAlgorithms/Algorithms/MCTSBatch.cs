@@ -129,7 +129,9 @@ namespace MastersAlgorithms.Algorithms
 
             _root = new Node(game);
             (var probs, var moves) = _priorFunc([_root.Game]);
-            var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight);
+            var actionMasks = game.GetActionMasks(out _);
+            // _priors = Utils.AddDirichletNoise(_priors, _noiseAlpha, _noiseWeight, actionMasks);
+            var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight, actionMasks);
             _root.Expand(noisyProbs, moves[0]);
             // _root.Expand(probs[0], moves[0]);
             _root.VisitCount++;
