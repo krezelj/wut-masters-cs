@@ -171,20 +171,46 @@ namespace MastersAlgorithms
             return maxIndex;
         }
 
-        public static float[] AddDirichletNoise(float[] values, float noiseAlpha, float noiseWeight)
+        public static float[] AddDirichletNoise(
+            float[] values,
+            float noiseAlpha,
+            float noiseWeight,
+            bool[]? actionMasks = null)
         {
+            int alphaLength = 0;
+            if (actionMasks == null)
+            {
+                actionMasks = new bool[values.Length];
+                for (int i = 0; i < actionMasks.Length; i++)
+                    actionMasks[i] = true;
+                alphaLength = actionMasks.Length;
+            }
+            else
+            {
+                for (int i = 0; i < actionMasks.Length; i++)
+                {
+                    if (actionMasks[i])
+                        alphaLength++;
+                }
+            }
+
             int valueCount = values.Length;
             float[] noisyValues = new float[valueCount];
 
-            double[] alpha = new double[valueCount];
-            for (int i = 0; i < valueCount; i++)
+            double[] alpha = new double[alphaLength];
+            for (int i = 0; i < alpha.Length; i++)
                 alpha[i] = noiseAlpha;
 
-            var dirichlet = new Dirichlet(alpha, Utils.mTwister);
+            var dirichlet = new Dirichlet(alpha, mTwister);
             double[] sample = dirichlet.Sample();
 
-            for (int i = 0; i < valueCount; i++)
-                noisyValues[i] = (float)((1 - noiseWeight) * values[i] + noiseWeight * sample[i]);
+            for (int i = 0, j = 0; i < valueCount; i++)
+            {
+                if (!actionMasks[i])
+                    continue;
+                float noise = (float)((1 - noiseWeight) * values[i] + noiseWeight * sample[j++]);
+                noisyValues[i] = noise;
+            }
 
             return noisyValues;
         }
