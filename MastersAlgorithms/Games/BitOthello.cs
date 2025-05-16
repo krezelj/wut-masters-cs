@@ -61,6 +61,15 @@ namespace MastersAlgorithms.Games
         private sbyte _opponent => (sbyte)(1 - _player);
 
         public bool IsOver => _emptyMask == 0 || _nullMoves == 2;
+        public int MaterialDiff
+        {
+            get
+            {
+                int blackCount = BitOperations.PopCount(_blackBoard);
+                int whiteCount = BitOperations.PopCount(_whiteBoard);
+                return blackCount - whiteCount;
+            }
+        }
 
         public int Result
         {
@@ -68,10 +77,10 @@ namespace MastersAlgorithms.Games
             {
                 if (!IsOver)
                     return -1;
-                float value = Evaluate();
-                if (value == 0)
+                int materialDiff = MaterialDiff;
+                if (materialDiff == 0)
                     return PossibleResultsCount - 1; // draw
-                if (value > 0)
+                if (materialDiff > 0)
                     return BLACK; // black won
                 return WHITE; // white won
             }
@@ -392,9 +401,7 @@ namespace MastersAlgorithms.Games
             float value = 0f;
             if (IsOver)
             {
-                int blackCount = BitOperations.PopCount(_blackBoard);
-                int whiteCount = BitOperations.PopCount(_whiteBoard);
-                value = MathF.Sign(blackCount - whiteCount) * 1e6f;
+                value = MathF.Sign(MaterialDiff) * 1e6f;
             }
             else
             {
