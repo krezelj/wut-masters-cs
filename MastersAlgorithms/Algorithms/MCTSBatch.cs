@@ -324,7 +324,7 @@ namespace MastersAlgorithms.Algorithms
             int stateCount = states.Length;
             int nPossibleMoves = states[0].PossibleMovesCount;
 
-            float[] obs = GetFlatObservations(states);
+            float[] obs = Utils.GetFlatObservations(states, _mode);
             IMove[][] moves = new IMove[stateCount][];
 
             bool[] actionMasks = new bool[nPossibleMoves * stateCount];
@@ -354,7 +354,7 @@ namespace MastersAlgorithms.Algorithms
         public float[] ValueEstimator(IGame[] states)
         {
             int stateCount = states.Length;
-            float[] obs = GetFlatObservations(states);
+            float[] obs = Utils.GetFlatObservations(states, _mode);
             return _agent.Policy.GetValue(obs, batchCount: stateCount);
         }
 
@@ -365,21 +365,5 @@ namespace MastersAlgorithms.Algorithms
             return Q + U;
         }
 
-        private float[] GetFlatObservations(IGame[] states)
-        {
-            int stateCount = states.Length;
-
-            // TODO possibly reuse this calculated value
-            int obsSize = states[0].GetObservation(_mode).Length;
-            float[] obs = new float[obsSize * stateCount];
-
-            for (int i = 0; i < stateCount; i++)
-            {
-                float[] currentObs = states[i].GetObservation(_mode);
-                Array.Copy(currentObs, 0, obs, i * obsSize, currentObs.Length);
-            }
-
-            return obs;
-        }
     }
 }

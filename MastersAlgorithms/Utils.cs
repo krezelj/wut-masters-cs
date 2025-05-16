@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using MastersAlgorithms.Games;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 
@@ -187,5 +188,23 @@ namespace MastersAlgorithms
 
             return noisyValues;
         }
+
+        public static float[] GetFlatObservations(IGame[] states, ObservationMode mode)
+        {
+            int stateCount = states.Length;
+
+            // TODO possibly reuse this calculated value
+            int obsSize = states[0].GetObservation(mode).Length;
+            float[] obs = new float[obsSize * stateCount];
+
+            for (int i = 0; i < stateCount; i++)
+            {
+                float[] currentObs = states[i].GetObservation(mode);
+                Array.Copy(currentObs, 0, obs, i * obsSize, currentObs.Length);
+            }
+
+            return obs;
+        }
+
     }
 }
