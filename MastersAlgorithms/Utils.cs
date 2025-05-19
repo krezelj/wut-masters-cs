@@ -242,5 +242,18 @@ namespace MastersAlgorithms
             return obs;
         }
 
+        public static ObservationMode GetObservationModeByName(string name)
+        {
+            switch (name)
+            {
+                case "flat":
+                    return ObservationMode.FLAT;
+                case "image":
+                    return ObservationMode.IMAGE;
+                default:
+                    throw new Exception("Invalid observation mode");
+            }
+        }
+
     }
 }

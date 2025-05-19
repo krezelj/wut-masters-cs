@@ -4,118 +4,6 @@ using MastersAlgorithms.Games;
 
 namespace MastersAlgorithms
 {
-    // public class CommandLineParser
-    // {
-    //     private readonly List<string> _args;
-    //     private Dictionary<string, string> _defaultValues;
-
-    //     public CommandLineParser(string[] args)
-    //     {
-    //         _args = args.ToList();
-    //         _defaultValues = new Dictionary<string, string>();
-    //     }
-
-    //     public void AddDefaultValue(string key, string value)
-    //     {
-    //         if (!_defaultValues.ContainsKey(key))
-    //         {
-    //             _defaultValues.Add(key, value);
-    //         }
-    //         else
-    //         {
-    //             _defaultValues[key] = value;
-    //         }
-    //     }
-
-    //     public string Get(string key, string? defaultValue = null)
-    //     {
-    //         var index = _args.IndexOf("--" + key);
-
-    //         if (index >= 0 && _args.Count > index)
-    //         {
-    //             return _args[index + 1];
-    //         }
-    //         else if (_defaultValues.ContainsKey(key))
-    //         {
-    //             return _defaultValues[key];
-    //         }
-    //         else if (defaultValue != null)
-    //         {
-    //             return defaultValue;
-    //         }
-
-    //         throw new KeyNotFoundException($"{key} not found in options");
-    //     }
-
-    //     public bool GetSwitch(string key)
-    //     {
-    //         return _args.Contains("--" + key);
-    //     }
-    // }
-
-    // public class ConnectionManager
-    // {
-    //     private CommandLineParser _cml;
-
-    //     public ConnectionManager(string[] args)
-    //     {
-    //         _cml = new CommandLineParser(args);
-    //     }
-
-    //     public void Run()
-    //     {
-    //         Utils.SetRNGSeed(int.Parse(_cml.Get("seed", "0")));
-    //         IAlgorithm algorithm = CreateAlgorithm();
-    //         while (true)
-    //         {
-    //             string state = Console.ReadLine()!; // todo check when null
-    //             if (state == "")
-    //                 return;
-
-    //             IGame game = CreateGame(state);
-    //             IMove move = algorithm.GetMove(game)!;
-
-    //             string debugMsg = _cml.GetSwitch("verbose") ? algorithm.GetDebugInfo() : "";
-    //             string response = $"{move.Index};{debugMsg}";
-    //             Console.WriteLine(response);
-    //         }
-    //     }
-
-    //     public IAlgorithm CreateAlgorithm()
-    //     {
-    //         string algorithmType = _cml.Get("algorithm");
-    //         switch (algorithmType)
-    //         {
-    //             case "minimax":
-    //                 return new Minimax(
-    //                     depth: int.Parse(_cml.Get("depth"))
-    //                 );
-    //             case "mcts":
-    //                 return new MCTS(
-    //                     maxIters: int.Parse(_cml.Get("maxiters")),
-    //                     estimator: MCTS.GetEstimatorByName(_cml.Get("estimator", "ucb"))
-    //                 );
-    //             default:
-    //                 throw new ArgumentException($"Invalid algorithm name: {algorithmType}");
-    //         }
-    //     }
-
-    //     public IGame CreateGame(string state)
-    //     {
-    //         string gameType = _cml.Get("game");
-    //         switch (gameType)
-    //         {
-    //             // case "connect-four":
-    //             //     return new ConnectFour(state);
-    //             case "othello":
-    //                 return new BitOthello(state);
-    //             default:
-    //                 throw new ArgumentException($"Invalid game name: {gameType}");
-    //         }
-    //     }
-
-    // }
-
     class ConnectionManager
     {
         private string[] _args;
@@ -291,16 +179,12 @@ namespace MastersAlgorithms
                         verbose: false
                     );
                 case "mcts":
-                    throw new NotImplementedException();
-                // return new MCTS(
-                //     maxIters: int.Parse(Get("maxiters")),
-                //     estimator: MCTS.GetEstimatorByName(Get("estimator", "ucb")),
-                //     verbose: false
-                // );
+                    return MCTSHybrid.GetDefaultMCTS(maxIters: int.Parse(Get("maxIters")), verbose: false);
                 case "agent":
                     return new Agent(
                         modelDirectory: Get("modelDirectory", Path.Join("models")),
-                        actorMode: ObservationMode.FLAT, // TODO change this later
+                        actorMode: Utils.GetObservationModeByName(Get("actorMode", "flat")),
+                        criticMode: Utils.GetObservationModeByName(Get("criticMode", "flat")),
                         deterministic: Get("deterministic") == "True" // TODO Change all Trues like this to `GetSwitch`
                     );
                 default:
