@@ -224,7 +224,6 @@ namespace MastersAlgorithms.Algorithms
                 values[i] = (1.0f - _lambda) * -valueEstimates[i] + _lambda * rolloutValues[i];
             }
             return values;
-            // // TODO include rollout
         }
 
         private IGame Rollout(IGame game)
@@ -363,7 +362,7 @@ namespace MastersAlgorithms.Algorithms
         {
             int stateCount = states.Length;
             float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
-            return _agent.Policy.GetValue(obs, batchCount: stateCount);
+            return _agent.Policy.GetValues(obs, batchCount: stateCount);
         }
 
         private float GetNodeQU(MCTSBatch.Node node)

@@ -319,7 +319,7 @@ namespace MastersAlgorithms.Algorithms
 
         public float ValueEstimator(IGame game)
         {
-            return _agent.Policy.GetValue(game.GetObservation(_agent.CriticMode))[0];
+            return _agent.Policy.GetValues(game.GetObservation(_agent.CriticMode))[0];
         }
     }
 }

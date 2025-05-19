@@ -51,7 +51,7 @@ namespace MastersAlgorithms.ActorCritic
             return Utils.MaskedSoftmax(GetLogits(input, batchCount), mask, batchCount);
         }
 
-        public float[] GetValue(float[] input, int batchCount = 1)
+        public float[] GetValues(float[] input, int batchCount = 1)
         {
             if (Critic != null)
                 return Critic.Forward(input, batchCount);
@@ -65,7 +65,7 @@ namespace MastersAlgorithms.ActorCritic
             if (!Unified)
             {
                 probs = GetMaskedProbs(input, mask, batchCount);
-                values = GetValue(input, batchCount);
+                values = GetValues(input, batchCount);
             }
             else
             {

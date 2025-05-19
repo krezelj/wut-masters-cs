@@ -37,7 +37,7 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            float value = Policy.GetValue(_game!.GetObservation(CriticMode))[0];
+            float value = Policy.GetValues(_game!.GetObservation(CriticMode))[0];
             return string.Format("Eval {0,5:F3}", value);
         }
 
