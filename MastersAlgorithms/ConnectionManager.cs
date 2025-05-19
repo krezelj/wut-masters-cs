@@ -187,7 +187,10 @@ namespace MastersAlgorithms
                         modelDirectory: Get("modelDirectory", Path.Join("models")),
                         actorMode: Utils.GetObservationModeByName(Get("actorMode", "flat")),
                         criticMode: Utils.GetObservationModeByName(Get("criticMode", "flat")),
-                        deterministic: GetSwitch("deterministic")
+                        deterministic: GetSwitch("deterministic"),
+                        device: Get("device", "cpu"),
+                        expectedBatchCount: int.Parse(Get("expectedBatchCount", "1")),
+                        unified: GetSwitch("unified")
                     );
                 default:
                     throw new ArgumentException($"Invalid algorithm name: {name}");

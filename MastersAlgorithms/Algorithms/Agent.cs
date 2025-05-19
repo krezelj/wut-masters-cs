@@ -11,6 +11,7 @@ namespace MastersAlgorithms.Algorithms
         public bool Deterministic;
         public string Device;
         public int ExpectedBatchCount;
+        public bool Unified;
         private IGame? _game;
         private bool _verbose;
 
@@ -21,12 +22,15 @@ namespace MastersAlgorithms.Algorithms
             bool deterministic = true,
             string device = "cpu",
             int expectedBatchCount = 1,
+            bool unified = true,
             bool verbose = false)
         {
             Device = device;
             ExpectedBatchCount = expectedBatchCount;
-            Policy = new ActorCriticPolicy(modelDirectory, Device, ExpectedBatchCount);
+            Unified = unified;
+            Policy = new ActorCriticPolicy(modelDirectory, Device, ExpectedBatchCount, Unified);
             ActorMode = actorMode;
+            CriticMode = criticMode;
             Deterministic = deterministic;
             _verbose = verbose;
         }
