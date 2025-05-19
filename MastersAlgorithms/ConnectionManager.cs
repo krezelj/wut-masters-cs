@@ -74,6 +74,7 @@ namespace MastersAlgorithms
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine("exception");
                     Console.WriteLine(e);
                 }
             }
