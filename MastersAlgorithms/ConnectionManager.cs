@@ -139,9 +139,9 @@ namespace MastersAlgorithms
                 //     return new ConnectFour(state);
                 case "othello":
                     if (state != "")
-                        return new BitOthello(state, useZobrist: Get("zobrist") == "True");
+                        return new BitOthello(state, useZobrist: GetSwitch("zobrist"));
                     else
-                        return new BitOthello(useZobrist: Get("zobrist") == "True");
+                        return new BitOthello(useZobrist: GetSwitch("zobrist"));
                 default:
                     throw new ArgumentException($"Invalid game name: {name}");
             }
@@ -185,7 +185,7 @@ namespace MastersAlgorithms
                         modelDirectory: Get("modelDirectory", Path.Join("models")),
                         actorMode: Utils.GetObservationModeByName(Get("actorMode", "flat")),
                         criticMode: Utils.GetObservationModeByName(Get("criticMode", "flat")),
-                        deterministic: Get("deterministic") == "True" // TODO Change all Trues like this to `GetSwitch`
+                        deterministic: GetSwitch("deterministic")
                     );
                 default:
                     throw new ArgumentException($"Invalid algorithm name: {name}");
@@ -256,7 +256,7 @@ namespace MastersAlgorithms
             var gameType = GetGameTypeByName(Get("gameType"));
             var players = Get("players").Split(";").Select(h => _algorithms[h]).ToArray();
             int nGames = int.Parse(Get("nGames"));
-            bool mirrorGames = Get("mirrorGames") == "True";
+            bool mirrorGames = GetSwitch("mirrorGames");
             int nRandomMoves = int.Parse(Get("nRandomMoves"));
 
             var mm = new MatchManager(players, gameType, nGames, mirrorGames, nRandomMoves);
