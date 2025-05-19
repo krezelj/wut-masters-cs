@@ -94,7 +94,7 @@ namespace MastersAlgorithms.Algorithms
             Func<IGame, (float[], IMove[])> priorFunc,
             Func<IGame, IMove> rolloutPolicy,
             Func<IGame, float> valueEstimator,
-            float lambda,
+            float lambda = 1.0f,
             bool verbose = false)
         {
             _sw = new Stopwatch();

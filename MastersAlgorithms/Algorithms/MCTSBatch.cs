@@ -271,7 +271,11 @@ namespace MastersAlgorithms.Algorithms
         public static MCTSBatch GetAgentMCTS(
             int maxIters,
             Agent agent,
+            int batchSize = 1,
             float lambda = 0.5f,
+            float noiseAlpha = 0.9f,
+            float noiseWeight = 0.25f,
+            int nVirtual = 5,
             float c = 5f,
             bool deterministicSelection = true,
             bool verbose = false)
@@ -283,7 +287,11 @@ namespace MastersAlgorithms.Algorithms
                 priorFunc: ac.PriorFunc,
                 rolloutPolicy: ac.RolloutPolicy,
                 valueEstimator: ac.ValueEstimator,
+                batchSize: batchSize,
                 lambda: lambda,
+                noiseAlpha: noiseAlpha,
+                noiseWeight: noiseWeight,
+                nVirtual: nVirtual,
                 verbose: verbose
             );
         }
