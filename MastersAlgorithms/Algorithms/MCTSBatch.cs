@@ -1,9 +1,6 @@
 
-using System.Data;
 using System.Diagnostics;
-using System.Transactions;
 using MastersAlgorithms.Games;
-using MathNet.Numerics.Distributions;
 
 namespace MastersAlgorithms.Algorithms
 {
@@ -70,13 +67,12 @@ namespace MastersAlgorithms.Algorithms
         private Stopwatch _sw;
         private float _time;
         private float _value;
+        private float[]? _rootValueArray;
         private Node? _bestChild;
 
         readonly int _maxIters;
         readonly Func<Node[], Node> _simulationPolicy;
-        readonly Func<IGame[], (float[][], IMove[][])> _priorFunc;
-        readonly Func<IGame, IMove> _rolloutPolicy; // TODO make batched?
-        readonly Func<IGame[], float[]> _valueEstimator;
+        readonly Func<IGame[], (float[][] probs, IMove[][] moves, float[] values)> _probsAndValueFunc;
         readonly int _batchSize;
         readonly float _lambda;
         readonly float _noiseAlpha;
@@ -87,9 +83,7 @@ namespace MastersAlgorithms.Algorithms
         public MCTSBatch(
             int maxIters,
             Func<Node[], Node> simulationPolicy,
-            Func<IGame[], (float[][], IMove[][])> priorFunc,
-            Func<IGame, IMove> rolloutPolicy,
-            Func<IGame[], float[]> valueEstimator,
+            Func<IGame[], (float[][], IMove[][], float[])> probsAndValueFunc,
             int batchSize = 1,
             float lambda = 0.5f,
             float noiseAlpha = 0.9f,
@@ -101,9 +95,7 @@ namespace MastersAlgorithms.Algorithms
             _sw = new Stopwatch();
             _maxIters = maxIters;
             _simulationPolicy = simulationPolicy;
-            _priorFunc = priorFunc;
-            _rolloutPolicy = rolloutPolicy;
-            _valueEstimator = valueEstimator;
+            _probsAndValueFunc = probsAndValueFunc;
             _batchSize = batchSize;
             _lambda = lambda;
             _noiseAlpha = noiseAlpha;
@@ -114,8 +106,10 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,6:F3} | VisitCount {4,6} | Eval {5}",
-                _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount, _value);
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,5:F3} | VisitCount {4,6}"
+                                + " | Root Eval {5,5:F3} | Eval {6,5:F3}",
+                _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount,
+                _rootValueArray![0], _value);
         }
 
         public IMove? GetMove(IGame game)
@@ -128,12 +122,10 @@ namespace MastersAlgorithms.Algorithms
             game = game.Copy(disableZobrist: true);
 
             _root = new Node(game);
-            (var probs, var moves) = _priorFunc([_root.Game]);
+            (var probs, var moves, _rootValueArray) = _probsAndValueFunc([_root.Game]);
             var actionMasks = game.GetActionMasks(out _);
-            // _priors = Utils.AddDirichletNoise(_priors, _noiseAlpha, _noiseWeight, actionMasks);
             var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight, actionMasks);
             _root.Expand(noisyProbs, moves[0]);
-            // _root.Expand(probs[0], moves[0]);
             _root.VisitCount++;
 
             for (int i = 0; i < _maxIters; i++)
@@ -156,8 +148,10 @@ namespace MastersAlgorithms.Algorithms
         {
             Node[] currentBatch = Select();
             var stateBatch = GetStateBatch(currentBatch);
-            Expand(currentBatch, stateBatch);
-            var valueBatch = Evaluate(currentBatch, stateBatch);
+            var output = _probsAndValueFunc(stateBatch);
+
+            Expand(currentBatch, output.probs, output.moves);
+            var valueBatch = Evaluate(currentBatch, output.values);
             Backtrack(currentBatch, valueBatch);
         }
 
@@ -188,9 +182,9 @@ namespace MastersAlgorithms.Algorithms
             return currentBatch;
         }
 
-        private void Expand(Node[] nodeBatch, IGame[] stateBatch)
+        private void Expand(Node[] nodeBatch, float[][] priorsBatch, IMove[][] movesBatch)
         {
-            (var priorsBatch, var movesBatch) = _priorFunc(stateBatch);
+            // (var priorsBatch, var movesBatch) = _priorFunc(stateBatch);
             for (int i = 0; i < _batchSize; i++)
             {
                 if (nodeBatch[i].IsTerminal)
@@ -199,7 +193,7 @@ namespace MastersAlgorithms.Algorithms
             }
         }
 
-        private float[] Evaluate(Node[] nodeBatch, IGame[] stateBatch)
+        private float[] Evaluate(Node[] nodeBatch, float[] valueEstimates)
         {
             float[] rolloutValues = new float[nodeBatch.Length];
             if (_lambda > 0)
@@ -214,9 +208,9 @@ namespace MastersAlgorithms.Algorithms
                 }
             }
 
-            float[] valueEstimates = new float[nodeBatch.Length];
-            if (_lambda < 1.0f)
-                valueEstimates = _valueEstimator(stateBatch);
+            // float[] valueEstimates = new float[nodeBatch.Length];
+            // if (_lambda < 1.0f)
+            //     valueEstimates = _valueEstimator(stateBatch);
 
             float[] values = new float[nodeBatch.Length];
             for (int i = 0; i < _batchSize; i++)
@@ -232,7 +226,6 @@ namespace MastersAlgorithms.Algorithms
             {
                 _nodes++;
                 IMove move = game.GetRandomMove();
-                // IMove move = _rolloutPolicy(game);
                 game.MakeMove(move, false);
             }
             return game;
@@ -283,9 +276,7 @@ namespace MastersAlgorithms.Algorithms
             return new MCTSBatch(
                 maxIters: maxIters,
                 simulationPolicy: ac.SimulationPolicy,
-                priorFunc: ac.PriorFunc,
-                rolloutPolicy: ac.RolloutPolicy,
-                valueEstimator: ac.ValueEstimator,
+                probsAndValueFunc: ac.ProbsAndValueFunc,
                 batchSize: batchSize,
                 lambda: lambda,
                 noiseAlpha: noiseAlpha,
@@ -326,14 +317,12 @@ namespace MastersAlgorithms.Algorithms
             return nodes[idx];
         }
 
-        public (float[][], IMove[][]) PriorFunc(IGame[] states)
+        public (float[][] probs, IMove[][] moves, float[] values) ProbsAndValueFunc(IGame[] states)
         {
             int stateCount = states.Length;
             int nPossibleMoves = states[0].PossibleMovesCount;
 
-            float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
             IMove[][] moves = new IMove[stateCount][];
-
             bool[] actionMasks = new bool[nPossibleMoves * stateCount];
             for (int i = 0; i < stateCount; i++)
             {
@@ -341,28 +330,17 @@ namespace MastersAlgorithms.Algorithms
                 Array.Copy(currentActionMasks, 0, actionMasks, i * nPossibleMoves, nPossibleMoves);
             }
 
-            var probsFlat = _agent.Policy.GetMaskedProbs(obs, actionMasks, batchCount: stateCount);
+            float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
+            var output = _agent.Policy.GetMaskedProbsAndValues(obs, actionMasks, batchCount: stateCount);
+
             float[][] probs = new float[stateCount][];
             for (int i = 0; i < stateCount; i++)
             {
                 probs[i] = new float[nPossibleMoves];
-                Array.Copy(probsFlat, i * nPossibleMoves, probs[i], 0, nPossibleMoves);
+                Array.Copy(output.probs, i * nPossibleMoves, probs[i], 0, nPossibleMoves);
             }
 
-            return (probs, moves);
-        }
-
-        public IMove RolloutPolicy(IGame game)
-        {
-            throw new NotImplementedException();
-            // return _agent.GetStochasticMove(game);
-        }
-
-        public float[] ValueEstimator(IGame[] states)
-        {
-            int stateCount = states.Length;
-            float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
-            return _agent.Policy.GetValues(obs, batchCount: stateCount);
+            return (probs, moves, output.values);
         }
 
         private float GetNodeQU(MCTSBatch.Node node)
@@ -371,6 +349,39 @@ namespace MastersAlgorithms.Algorithms
             float U = _c * node.PriorProbabiltity * MathF.Sqrt(node.Parent!.VisitCount) / (1 + node.VisitCount);
             return Q + U;
         }
+
+        // public (float[][], IMove[][]) PriorFunc(IGame[] states)
+        // {
+        //     int stateCount = states.Length;
+        //     int nPossibleMoves = states[0].PossibleMovesCount;
+
+        //     float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
+        //     IMove[][] moves = new IMove[stateCount][];
+
+        //     bool[] actionMasks = new bool[nPossibleMoves * stateCount];
+        //     for (int i = 0; i < stateCount; i++)
+        //     {
+        //         bool[] currentActionMasks = states[i].GetActionMasks(out moves[i]);
+        //         Array.Copy(currentActionMasks, 0, actionMasks, i * nPossibleMoves, nPossibleMoves);
+        //     }
+
+        //     var probsFlat = _agent.Policy.GetMaskedProbs(obs, actionMasks, batchCount: stateCount);
+        //     float[][] probs = new float[stateCount][];
+        //     for (int i = 0; i < stateCount; i++)
+        //     {
+        //         probs[i] = new float[nPossibleMoves];
+        //         Array.Copy(probsFlat, i * nPossibleMoves, probs[i], 0, nPossibleMoves);
+        //     }
+
+        //     return (probs, moves);
+        // }
+
+        // public float[] ValueEstimator(IGame[] states)
+        // {
+        //     int stateCount = states.Length;
+        //     float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
+        //     return _agent.Policy.GetValues(obs, batchCount: stateCount);
+        // }
 
     }
 }

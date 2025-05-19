@@ -25,6 +25,10 @@ namespace MastersAlgorithms
         public static void SetRNGSeed(int seed)
         {
             RNG = new Random(seed);
+        }
+
+        public static void SetMTSeed(int seed)
+        {
             mTwister = new MersenneTwister(seed);
         }
 
