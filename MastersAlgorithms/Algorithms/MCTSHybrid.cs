@@ -291,13 +291,11 @@ namespace MastersAlgorithms.Algorithms
     public class AgentController
     {
         private Agent _agent;
-        private ObservationMode _mode;
         private float _c;
 
         public AgentController(Agent agent, float c = 5.0f)
         {
             _agent = agent;
-            _mode = _agent.Mode;
             _c = c;
         }
 
@@ -311,7 +309,7 @@ namespace MastersAlgorithms.Algorithms
         public (float[], IMove[]) PriorFunc(IGame game)
         {
             var actionMasks = game.GetActionMasks(out IMove[] moves);
-            return (_agent.Policy.GetMaskedProbs(game.GetObservation(_mode), actionMasks), moves);
+            return (_agent.Policy.GetMaskedProbs(game.GetObservation(_agent.ActorMode), actionMasks), moves);
         }
 
         public IMove RolloutPolicy(IGame game)
@@ -321,7 +319,7 @@ namespace MastersAlgorithms.Algorithms
 
         public float ValueEstimator(IGame game)
         {
-            return _agent.Policy.GetValue(game.GetObservation(_mode))[0];
+            return _agent.Policy.GetValue(game.GetObservation(_agent.CriticMode))[0];
         }
     }
 }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using MastersAlgorithms.Games;
@@ -63,6 +65,14 @@ namespace MastersAlgorithms
         //         yield return (i + diff.di, j + diff.dj);
         //     }
         // }
+
+        public static T Product<T>(T[] input) where T : INumber<T>
+        {
+            T product = T.One;
+            for (int i = 0; i < input.Length; i++)
+                product *= input[i];
+            return product;
+        }
 
         public static float[] Softmax(float[] input, int batchCount = 1)
         {

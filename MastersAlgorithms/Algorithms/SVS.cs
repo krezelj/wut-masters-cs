@@ -214,17 +214,15 @@ namespace MastersAlgorithms.Algorithms
     public class AgentControllerSVS
     {
         private Agent _agent;
-        private ObservationMode _mode;
 
         public AgentControllerSVS(Agent agent)
         {
             _agent = agent;
-            _mode = _agent.Mode;
         }
 
         public (float[], IMove[]) PriorFunc(IGame state)
         {
-            float[] obs = state.GetObservation(_mode);
+            float[] obs = state.GetObservation(_agent.ActorMode);
             bool[] actionMasks = state.GetActionMasks(out IMove[] moves);
             float[] probs = _agent.Policy.GetMaskedProbs(obs, actionMasks);
             // float[] probs = new float[moves.Length];
@@ -234,7 +232,7 @@ namespace MastersAlgorithms.Algorithms
         public float[] ValueEstimator(IGame[] states)
         {
             int stateCount = states.Length;
-            float[] obs = Utils.GetFlatObservations(states, _mode);
+            float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
             return _agent.Policy.GetValue(obs, batchCount: stateCount);
         }
     }

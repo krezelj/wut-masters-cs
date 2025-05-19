@@ -6,7 +6,8 @@ namespace MastersAlgorithms.Algorithms
     public class Agent : IAlgorithm
     {
         public ActorCriticPolicy Policy;
-        public ObservationMode Mode;
+        public ObservationMode ActorMode;
+        public ObservationMode CriticMode;
         public bool Deterministic;
         public string Device;
         public int ExpectedBatchCount;
@@ -15,8 +16,9 @@ namespace MastersAlgorithms.Algorithms
 
         public Agent(
             string modelDirectory,
-            ObservationMode mode,
-            bool deterministic,
+            ObservationMode actorMode = ObservationMode.FLAT,
+            ObservationMode criticMode = ObservationMode.FLAT,
+            bool deterministic = true,
             string device = "cpu",
             int expectedBatchCount = 1,
             bool verbose = false)
@@ -24,14 +26,14 @@ namespace MastersAlgorithms.Algorithms
             Device = device;
             ExpectedBatchCount = expectedBatchCount;
             Policy = new ActorCriticPolicy(modelDirectory, Device, ExpectedBatchCount);
-            Mode = mode;
+            ActorMode = actorMode;
             Deterministic = deterministic;
             _verbose = verbose;
         }
 
         public string GetDebugInfo()
         {
-            float value = Policy.GetValue(_game!.GetObservation(Mode))[0];
+            float value = Policy.GetValue(_game!.GetObservation(CriticMode))[0];
             return string.Format("Eval {0,5:F3}", value);
         }
 
@@ -49,7 +51,7 @@ namespace MastersAlgorithms.Algorithms
         public IMove GetStochasticMove(IGame game)
         {
             var actionMasks = game.GetActionMasks(out IMove[] moves);
-            var probs = Policy.GetMaskedProbs(game.GetObservation(Mode), actionMasks);
+            var probs = Policy.GetMaskedProbs(game.GetObservation(ActorMode), actionMasks);
             var sampledIndex = Utils.Sample(probs);
             for (int i = 0; i < moves.Length; i++)
             {
@@ -64,7 +66,7 @@ namespace MastersAlgorithms.Algorithms
         public IMove GetDeterministicMove(IGame game)
         {
             var actionMasks = game.GetActionMasks(out IMove[] moves);
-            var probs = Policy.GetMaskedProbs(game.GetObservation(Mode), actionMasks);
+            var probs = Policy.GetMaskedProbs(game.GetObservation(ActorMode), actionMasks);
             int idxMax = Utils.ArgMax(probs);
             for (int i = 0; i < moves.Length; i++)
             {

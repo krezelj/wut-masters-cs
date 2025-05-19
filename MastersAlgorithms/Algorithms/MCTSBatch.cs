@@ -293,14 +293,12 @@ namespace MastersAlgorithms.Algorithms
     public class AgentControllerBatch
     {
         private Agent _agent;
-        private ObservationMode _mode;
         private float _c;
         private bool _deterministicSelection;
 
         public AgentControllerBatch(Agent agent, float c = 5.0f, bool deterministicSelection = true)
         {
             _agent = agent;
-            _mode = _agent.Mode;
             _c = c;
             _deterministicSelection = deterministicSelection;
         }
@@ -326,7 +324,7 @@ namespace MastersAlgorithms.Algorithms
             int stateCount = states.Length;
             int nPossibleMoves = states[0].PossibleMovesCount;
 
-            float[] obs = Utils.GetFlatObservations(states, _mode);
+            float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
             IMove[][] moves = new IMove[stateCount][];
 
             bool[] actionMasks = new bool[nPossibleMoves * stateCount];
@@ -356,7 +354,7 @@ namespace MastersAlgorithms.Algorithms
         public float[] ValueEstimator(IGame[] states)
         {
             int stateCount = states.Length;
-            float[] obs = Utils.GetFlatObservations(states, _mode);
+            float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
             return _agent.Policy.GetValue(obs, batchCount: stateCount);
         }
 

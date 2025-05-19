@@ -300,7 +300,7 @@ namespace MastersAlgorithms
                 case "agent":
                     return new Agent(
                         modelDirectory: Get("modelDirectory", Path.Join("models")),
-                        mode: ObservationMode.FLAT, // TODO change this later
+                        actorMode: ObservationMode.FLAT, // TODO change this later
                         deterministic: Get("deterministic") == "True" // TODO Change all Trues like this to `GetSwitch`
                     );
                 default:

@@ -44,12 +44,18 @@ namespace MastersAlgorithms.ActorCritic
             _outputNames = outputMetadata.Keys.ToArray();
             _outputDimensions = outputMetadata[_outputNames[0]].Dimensions.ToArray();
 
-            _bufferInput = new float[_inputDimensions[1] * ExpectedBatchCount];
-            _bufferOutput = new float[_outputDimensions[1] * ExpectedBatchCount];
+            int inputFlatLength = Utils.Product(_inputDimensions[1..]);
+            int outputFlatLength = Utils.Product(_outputDimensions[1..]);
+
+            _bufferInput = new float[inputFlatLength * ExpectedBatchCount];
+            _bufferOutput = new float[outputFlatLength * ExpectedBatchCount];
+
+            _inputDimensions[0] = ExpectedBatchCount;
+            _outputDimensions[0] = ExpectedBatchCount;
             var tensorInput = new DenseTensor<float>(
-                _bufferInput, [ExpectedBatchCount, _bufferInput.Length / ExpectedBatchCount]);
+                _bufferInput, _inputDimensions);
             var tensorOutput = new DenseTensor<float>(
-                _bufferOutput, [ExpectedBatchCount, _bufferOutput.Length / ExpectedBatchCount]);
+                _bufferOutput, _outputDimensions);
 
             FixedBufferOnnxValue valueInput = FixedBufferOnnxValue.CreateFromTensor(tensorInput);
             FixedBufferOnnxValue valueOutput = FixedBufferOnnxValue.CreateFromTensor(tensorOutput);
@@ -63,7 +69,8 @@ namespace MastersAlgorithms.ActorCritic
             if (batchCount == ExpectedBatchCount)
                 return BufferedInference(input);
 
-            var tensorInput = new DenseTensor<float>(input, [batchCount, input.Length / batchCount]);
+            _inputDimensions[0] = batchCount;
+            var tensorInput = new DenseTensor<float>(input, _inputDimensions);
             var namedInput = new List<NamedOnnxValue>
             {
                 NamedOnnxValue.CreateFromTensor("input", tensorInput)
