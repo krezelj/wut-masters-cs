@@ -76,6 +76,7 @@ namespace MastersAlgorithms
                 {
                     Console.WriteLine("exception");
                     Console.WriteLine(e);
+                    Console.WriteLine("end");
                 }
             }
         }
@@ -136,13 +137,13 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
-                // case "connect-four":
+                // case "connectFour":
                 //     return new ConnectFour(state);
                 case "othello":
                     if (state != "")
-                        return new BitOthello(state, useZobrist: GetSwitch("zobrist"));
+                        return new BitOthello(state, useZobrist: GetSwitch("useZobrist"));
                     else
-                        return new BitOthello(useZobrist: GetSwitch("zobrist"));
+                        return new BitOthello(useZobrist: GetSwitch("useZobrist"));
                 default:
                     throw new ArgumentException($"Invalid game name: {name}");
             }
