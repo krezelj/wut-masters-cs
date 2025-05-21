@@ -60,7 +60,7 @@ namespace MastersAlgorithms.Games
         public int Player => _player;
         private sbyte _opponent => (sbyte)(1 - _player);
 
-        public bool IsOver => _emptyMask == 0 || _nullMoves == 2;
+        public bool IsOver => EmptyMask == 0 || _nullMoves == 2;
         public int MaterialDiff
         {
             get
@@ -89,7 +89,7 @@ namespace MastersAlgorithms.Games
         private ulong _blackBoard;
         private ulong _whiteBoard;
 
-        private ref ulong _playerBoard
+        public ref ulong PlayerBoard
         {
             get
             {
@@ -99,7 +99,7 @@ namespace MastersAlgorithms.Games
                     return ref _whiteBoard;
             }
         }
-        private ref ulong _opponentBoard
+        public ref ulong OpponentBoard
         {
             get
             {
@@ -110,7 +110,7 @@ namespace MastersAlgorithms.Games
             }
         }
 
-        private ulong _emptyMask => (~_whiteBoard) & (~_blackBoard);
+        public ulong EmptyMask => (~_whiteBoard) & (~_blackBoard);
         private sbyte _nullMoves;
 
         private bool _useZobrist;
@@ -169,14 +169,14 @@ namespace MastersAlgorithms.Games
             _zobristHash!.ResetKey();
             _zobristHash!.UpdatePosition(BLACK, _blackBoard);
             _zobristHash!.UpdatePosition(WHITE, _whiteBoard);
-            _zobristHash!.UpdatePosition(EMPTY, _emptyMask);
+            _zobristHash!.UpdatePosition(EMPTY, EmptyMask);
             if (_player == WHITE)
                 _zobristHash!.UpdatePlayer();
         }
 
         private bool IsCapturePossible(ulong position)
         {
-            ulong opponentNeighbors = position.Expand8() & _opponentBoard;
+            ulong opponentNeighbors = position.Expand8() & OpponentBoard;
             while (opponentNeighbors > 0)
             {
                 ulong mask = opponentNeighbors.PopNextPosition();
@@ -185,11 +185,11 @@ namespace MastersAlgorithms.Games
                 do
                 {
                     mask.ShiftToNeighbor(offset);
-                    if (!_opponentBoard.Contains(mask))
+                    if (!OpponentBoard.Contains(mask))
                         break;
                 } while (mask > 0);
 
-                if (_playerBoard.Contains(mask))
+                if (PlayerBoard.Contains(mask))
                     return true;
             }
             return false;
@@ -198,7 +198,7 @@ namespace MastersAlgorithms.Games
         public IMove[] GetMoves()
         {
             // empty positions next to opponent discs
-            ulong perimeter = _opponentBoard.Expand8() & _emptyMask;
+            ulong perimeter = OpponentBoard.Expand8() & EmptyMask;
             ulong moveMask = 0UL;
             while (perimeter > 0)
             {
@@ -223,7 +223,7 @@ namespace MastersAlgorithms.Games
 
         public IMove GetRandomMove()
         {
-            ulong perimeter = _opponentBoard.Expand8() & _emptyMask;
+            ulong perimeter = OpponentBoard.Expand8() & EmptyMask;
 
             while (perimeter > 0)
             {
@@ -288,7 +288,7 @@ namespace MastersAlgorithms.Games
         {
             ulong capturesMask = 0UL;
 
-            ulong opponentNeighbors = position.Expand8() & _opponentBoard;
+            ulong opponentNeighbors = position.Expand8() & OpponentBoard;
             while (opponentNeighbors > 0)
             {
                 ulong mask = opponentNeighbors.PopNextPosition();
@@ -298,12 +298,12 @@ namespace MastersAlgorithms.Games
                 do
                 {
                     mask.ShiftToNeighbor(offset);
-                    if (!_opponentBoard.Contains(mask))
+                    if (!OpponentBoard.Contains(mask))
                         break;
                     captureMask |= mask;
                 } while (mask > 0);
 
-                if (_playerBoard.Contains(mask))
+                if (PlayerBoard.Contains(mask))
                     capturesMask |= captureMask;
             }
             return capturesMask;
@@ -330,8 +330,8 @@ namespace MastersAlgorithms.Games
                     flipMask = GetCapturesFromPosition(move.Position);
                 else
                     flipMask = move.FlipMask;
-                _playerBoard.SetPositions(move.Position | flipMask);
-                _opponentBoard.ClearPositions(flipMask);
+                PlayerBoard.SetPositions(move.Position | flipMask);
+                OpponentBoard.ClearPositions(flipMask);
 
                 // update zobrist hash
                 if (_useZobrist)
@@ -345,7 +345,7 @@ namespace MastersAlgorithms.Games
                 move.FlipMask = flipMask;
                 _nullMoves = 0;
             }
-            _player = (sbyte)(1 - _player);
+            SwitchPlayers();
             if (_useZobrist)
             {
                 _zobristHash!.UpdatePlayer();
@@ -355,7 +355,7 @@ namespace MastersAlgorithms.Games
         public void UndoMove(IMove m)
         {
             BitOthelloMove move = (BitOthelloMove)m;
-            _player = (sbyte)(1 - _player);
+            SwitchPlayers();
             if (_useZobrist)
             {
                 _zobristHash!.UpdatePlayer();
@@ -367,8 +367,8 @@ namespace MastersAlgorithms.Games
             else
             {
                 // ++_emptyCount;
-                _playerBoard.ClearPositions(move.Position | move.FlipMask);
-                _opponentBoard.SetPositions(move.FlipMask);
+                PlayerBoard.ClearPositions(move.Position | move.FlipMask);
+                OpponentBoard.SetPositions(move.FlipMask);
 
                 // update zobrist hash
                 if (_useZobrist)
@@ -445,12 +445,12 @@ namespace MastersAlgorithms.Games
         {
             float[] obs = new float[2 * BOARD_SIZE * BOARD_SIZE];
             const int offset = BOARD_SIZE * BOARD_SIZE;
-            var mask = _playerBoard;
+            var mask = PlayerBoard;
             while (mask > 0)
             {
                 obs[mask.PopNextIndex()] = 1.0f;
             }
-            mask = _opponentBoard;
+            mask = OpponentBoard;
             while (mask > 0)
             {
                 obs[mask.PopNextIndex() + offset] = 1.0f;
@@ -524,6 +524,10 @@ namespace MastersAlgorithms.Games
             }
         }
 
+        public void SwitchPlayers()
+        {
+            _player = (sbyte)(1 - _player);
+        }
         public override string ToString()
         {
             char[] chars = new char[BOARD_SIZE * BOARD_SIZE + 2];
@@ -540,7 +544,7 @@ namespace MastersAlgorithms.Games
                 int idx = tmp.PopNextPosition().Index();
                 chars[idx] = 'O';
             }
-            tmp = _emptyMask;
+            tmp = EmptyMask;
             while (tmp > 0)
             {
                 int idx = tmp.PopNextPosition().Index();
