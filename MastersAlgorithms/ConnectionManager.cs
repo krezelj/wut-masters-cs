@@ -178,6 +178,7 @@ namespace MastersAlgorithms
                 case "minimax":
                     return new MinimaxFast(
                         depth: int.Parse(Get("depth")),
+                        evalFunc: g => g.Evaluate(),
                         verbose: false
                     );
                 case "mcts":

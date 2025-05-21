@@ -21,6 +21,7 @@ namespace MastersAlgorithms.Algorithms
         private long _nodes = 0;
         private long _cacheHits = 0;
         private int _depth;
+        private Func<IGame, float> _evalFunc;
         private bool _verbose;
 
         private Stopwatch _sw;
@@ -29,10 +30,14 @@ namespace MastersAlgorithms.Algorithms
         private IGame? _game;
         private IMove? _bestMoveInRoot;
 
-        public MinimaxFast(int depth, bool verbose = false)
+        public MinimaxFast(
+            int depth,
+            Func<IGame, float> evalFunc,
+            bool verbose = false)
         {
             _sw = new Stopwatch();
             _depth = depth;
+            _evalFunc = evalFunc;
             _verbose = verbose;
         }
 
@@ -60,7 +65,7 @@ namespace MastersAlgorithms.Algorithms
             _nodes++;
 
             if (depth == 0 || _game!.IsOver)
-                return _game!.Evaluate();
+                return _evalFunc(_game!);
             bool isRoot = ply == 0;
 
             ulong zKey = _game.zKey;
