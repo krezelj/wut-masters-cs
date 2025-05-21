@@ -273,6 +273,10 @@ namespace MastersAlgorithms.Games
             }
         }
 
+        public float NaiveEvaluate() => throw new NotImplementedException();
+        public float MobilityEvaluate() => throw new NotImplementedException();
+        public float RandomEvaluate() => throw new NotImplementedException();
+
         public float Evaluate()
         {
             float value = 0;

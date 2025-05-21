@@ -25,6 +25,9 @@ namespace MastersAlgorithms.Games
 
         void UndoMove(IMove move);
 
+        float NaiveEvaluate();
+        float MobilityEvaluate();
+        float RandomEvaluate();
         float Evaluate();
 
         IGame Copy(bool disableZobrist = false);

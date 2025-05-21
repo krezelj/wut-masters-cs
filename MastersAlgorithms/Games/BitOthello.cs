@@ -28,16 +28,6 @@ namespace MastersAlgorithms.Games
         public static int PossibleResultsCount => 3;
         public int PossibleMovesCount => BOARD_SIZE * BOARD_SIZE + 1;
 
-        // private readonly int[] _weights =
-        //     {100, -20, 10, 5, 5, 10, -20, 100,
-        //     -20, -50, -2, -2, -2, -2, -50, -20,
-        //     10, -2, -1, -1, -1, -1, -2, 10,
-        //     5, -2, -1, -1, -1, -1, -2, 5,
-        //     5, -2, -1, -1, -1, -1, -2, 5,
-        //     10, -2, -1, -1, -1, -1, -2, 10,
-        //     -20, -50, -2, -2, -2, -2, -50, -20,
-        //     100, -20, 10, 5, 5, 10, -20, 100};
-
         private static readonly ulong[] _weightMasks = {
             0b0000000000000000001111000011110000111100001111000000000000000000UL, // -1
             0b0000000000111100010000100100001001000010010000100011110000000000UL, // -2
@@ -54,7 +44,8 @@ namespace MastersAlgorithms.Games
         private const sbyte BLACK = 0;
         private const sbyte WHITE = 1;
         private const sbyte EMPTY = 2;
-        private const sbyte BOARD_SIZE = 8;
+        public const sbyte BOARD_SIZE = 8;
+        public static readonly ulong CORNER_MASK = (0x1UL) | (0x1UL << 7) | (0x1UL << 56) | (0x1UL << 63);
 
         private sbyte _player = BLACK;
         public int Player => _player;
@@ -382,40 +373,70 @@ namespace MastersAlgorithms.Games
             }
         }
 
-        public float Evaluate()
+        public float NaiveEvaluate()
         {
-            // float value = 0f;
+            float value = MathF.Sign(MaterialDiff) * 1e6f;
+            return value * (_player == BLACK ? 1 : -1);
+        }
 
-            // ulong mask = _blackBoard;
-            // while (mask > 0)
-            // {
-            //     value += _weights[mask.PopNextPosition().Index()];
-            // }
-            // mask = _whiteBoard;
-            // while (mask > 0)
-            // {
-            //     value -= _weights[mask.PopNextPosition().Index()];
-            // }
-
-
-            float value = 0f;
+        public float MobilityEvaluate()
+        {
             if (IsOver)
+                return NaiveEvaluate();
+
+            int blackCorners = BitOperations.PopCount(_blackBoard & CORNER_MASK);
+            int whiteCorners = BitOperations.PopCount(_whiteBoard & CORNER_MASK);
+            float cornerDiff = blackCorners - whiteCorners;
+
+            float mobilityBlack, mobilityWhite;
+            if (_player == BLACK)
             {
-                value = MathF.Sign(MaterialDiff) * 1e6f;
+                mobilityBlack = GetMoves().Length;
+                SwitchPlayers();
+                mobilityWhite = GetMoves().Length;
+                SwitchPlayers();
             }
             else
             {
-                for (int i = 0; i < _weightValues.Length; ++i)
-                {
-                    ulong mask = _blackBoard & _weightMasks[i];
-                    value += _weightValues[i] * BitOperations.PopCount(mask);
-
-                    mask = _whiteBoard & _weightMasks[i];
-                    value -= _weightValues[i] * BitOperations.PopCount(mask);
-                }
+                SwitchPlayers();
+                mobilityBlack = GetMoves().Length;
+                SwitchPlayers();
+                mobilityWhite = GetMoves().Length;
             }
 
-            return value * (_player == 0 ? 1 : -1);
+
+            float mobilityFactor = (mobilityBlack - mobilityWhite) / (mobilityBlack + mobilityWhite);
+
+            const float W1 = 10, W2 = 1;
+            float value = W1 * cornerDiff + W2 * mobilityFactor;
+            return value * (_player == BLACK ? 1 : -1);
+        }
+
+        public float RandomEvaluate()
+        {
+            if (IsOver)
+                return NaiveEvaluate();
+
+            float value = (float)Utils.RNG.NextDouble() * 2 - 1;
+            return value * (_player == BLACK ? 1 : -1);
+        }
+
+        public float Evaluate()
+        {
+            if (IsOver)
+                return NaiveEvaluate();
+
+            float value = 0f;
+            for (int i = 0; i < _weightValues.Length; ++i)
+            {
+                ulong mask = _blackBoard & _weightMasks[i];
+                value += _weightValues[i] * BitOperations.PopCount(mask);
+
+                mask = _whiteBoard & _weightMasks[i];
+                value -= _weightValues[i] * BitOperations.PopCount(mask);
+            }
+
+            return value * (_player == BLACK ? 1 : -1);
         }
 
         public IGame Copy(bool disableZobrist = false)
