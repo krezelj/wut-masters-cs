@@ -176,6 +176,8 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
+                case "bogo":
+                    return new Bogo();
                 case "minimax":
                     return new MinimaxFast(
                         depth: int.Parse(Get("depth")),
