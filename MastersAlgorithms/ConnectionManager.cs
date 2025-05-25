@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using MastersAlgorithms.Algorithms;
 using MastersAlgorithms.Games;
@@ -178,24 +179,60 @@ namespace MastersAlgorithms
                 case "minimax":
                     return new MinimaxFast(
                         depth: int.Parse(Get("depth")),
-                        evalFunc: g => g.Evaluate(),
+                        evalFunc: GetEvalFunc(),
                         verbose: false
                     );
                 case "mcts":
                     return MCTSHybrid.GetDefaultMCTS(maxIters: int.Parse(Get("maxIters")), verbose: false);
                 case "agent":
-                    return new Agent(
-                        modelDirectory: Get("modelDirectory", Path.Join("models")),
-                        actorMode: Utils.GetObservationModeByName(Get("actorMode", "flat")),
-                        criticMode: Utils.GetObservationModeByName(Get("criticMode", "flat")),
-                        deterministic: GetSwitch("deterministic"),
-                        device: Get("device", "cpu"),
-                        expectedBatchCount: int.Parse(Get("expectedBatchCount", "1")),
-                        unified: GetSwitch("unified")
+                    return GetAgent();
+                case "mctsBatch":
+                    return MCTSBatch.GetAgentMCTS(
+                        maxIters: int.Parse(Get("maxIters")),
+                        agent: GetAgent(),
+                        batchSize: int.Parse(Get("batchSize")),
+                        lambda: float.Parse(Get("lam", "0.0"), CultureInfo.InvariantCulture),
+                        noiseAlpha: float.Parse(Get("noiseAlpha", "0.9"), CultureInfo.InvariantCulture),
+                        noiseWeight: float.Parse(Get("noiseWeight", "0.25"), CultureInfo.InvariantCulture),
+                        nVirtual: int.Parse(Get("nVirtual", "5")),
+                        c: float.Parse(Get("cPuct", "2.0"), CultureInfo.InvariantCulture),
+                        deterministicSelection: !GetSwitch("stochasticSelection"),
+                        verbose: false
                     );
                 default:
                     throw new ArgumentException($"Invalid algorithm name: {name}");
             }
+        }
+
+        private Func<IGame, float> GetEvalFunc()
+        {
+            string evalFuncName = Get("evalFuncName", "standard");
+            switch (evalFuncName)
+            {
+                case "standard":
+                    return g => g.Evaluate();
+                case "naive":
+                    return g => g.NaiveEvaluate();
+                case "mobility":
+                    return g => g.MobilityEvaluate();
+                case "random":
+                    return g => g.RandomEvaluate();
+                default:
+                    throw new ArgumentException($"Invalid eval func name: {evalFuncName}");
+            }
+        }
+
+        private Agent GetAgent()
+        {
+            return new Agent(
+                modelDirectory: Get("modelDirectory", Path.Join("models")),
+                actorMode: Utils.GetObservationModeByName(Get("actorMode", "flat")),
+                criticMode: Utils.GetObservationModeByName(Get("criticMode", "flat")),
+                deterministic: GetSwitch("deterministic"),
+                device: Get("device", "cpu"),
+                expectedBatchCount: int.Parse(Get("expectedBatchCount", "1")),
+                unified: GetSwitch("unified")
+            );
         }
 
         private string GetMove()

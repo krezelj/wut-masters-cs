@@ -47,13 +47,12 @@ namespace MastersAlgorithms
 
         public string GetDebugInfo()
         {
-            var meanTimes = string.Join(",",
+            var meanTimes = string.Join(";",
                 Enumerable.Range(0, Players.Length).
                 Select(i => PlayerTimes[i] / (PlayerMoveCount[i] * Stopwatch.Frequency) * 1000)
             );
-            return meanTimes;
-            // var strResults = string.Join(",", Results.Cast<int>().ToArray());
-            // return $"{meanTimes},{strResults}";
+            var strResults = string.Join(",", Results.Cast<int>().ToArray());
+            return $"{strResults};{meanTimes}";
         }
 
         public void Run()
