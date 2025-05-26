@@ -69,7 +69,7 @@ namespace MastersAlgorithms.ActorCritic
             }
             else
             {
-                (float[] logits, values) = ActorCritic!.Forward(input);
+                (float[] logits, values) = ActorCritic!.Forward(input, batchCount);
                 probs = Utils.MaskedSoftmax(logits, mask, batchCount);
             }
             return (probs, values);
