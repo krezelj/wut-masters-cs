@@ -275,6 +275,16 @@ namespace MastersAlgorithms.Games
             return move;
         }
 
+        public IMove GetMoveFromAction(int action)
+        {
+            if (action == BitOthelloMove.NullIndex)
+                return BitOthelloMove.NullMove(_nullMoves);
+
+            ulong position = 1UL << action;
+            BitOthelloMove move = new BitOthelloMove(position, _nullMoves);
+            return move;
+        }
+
         private ulong GetCapturesFromPosition(ulong position)
         {
             ulong capturesMask = 0UL;

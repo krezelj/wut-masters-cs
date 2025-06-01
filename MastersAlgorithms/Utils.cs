@@ -185,6 +185,21 @@ namespace MastersAlgorithms
             return maxIndex;
         }
 
+        public static int ArgMin(float[] input)
+        {
+            float min = float.MaxValue;
+            int minIndex = -1;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] < min)
+                {
+                    min = input[i];
+                    minIndex = i;
+                }
+            }
+            return minIndex;
+        }
+
         public static float[] AddDirichletNoise(
             float[] values,
             float noiseAlpha,

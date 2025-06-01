@@ -158,6 +158,11 @@ namespace MastersAlgorithms.Games
             throw new NotImplementedException();
         }
 
+        public IMove GetMoveFromAction(int action)
+        {
+            throw new NotImplementedException();
+        }
+
         private List<(int, int)> GetCapturesFromPosition(int i, int j)
         {
             List<(int, int)>? captures = new List<(int, int)>(); ;

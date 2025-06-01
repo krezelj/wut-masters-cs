@@ -39,5 +39,7 @@ namespace MastersAlgorithms.Games
         void Display(bool showMoves = true);
 
         IMove GetMoveFromString(string m);
+
+        IMove GetMoveFromAction(int action);
     }
 }
