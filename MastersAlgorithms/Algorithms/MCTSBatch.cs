@@ -174,6 +174,7 @@ namespace MastersAlgorithms.Algorithms
 
                     // add virtual losses to discourage from exploring this node
                     current.VisitCount += _nVirtual;
+                    current.ValueSum -= _nVirtual;
                     if (current.IsTerminal)
                         break;
                 }
@@ -196,16 +197,15 @@ namespace MastersAlgorithms.Algorithms
         private float[] Evaluate(Node[] nodeBatch, float[] valueEstimates)
         {
             float[] rolloutValues = new float[nodeBatch.Length];
-            if (_lambda > 0)
+            for (int i = 0; i < _batchSize; i++)
             {
-                for (int i = 0; i < _batchSize; i++)
-                {
-                    IGame terminalState = Rollout(nodeBatch[i].Game.Copy());
-                    float rolloutValue = terminalState.Evaluate();
-                    if (terminalState.Player == nodeBatch[i].Game.Player)
-                        rolloutValue = -rolloutValue;
-                    rolloutValues[i] = MathF.Sign(rolloutValue);
-                }
+                if (_lambda == 0 && !nodeBatch[i].IsTerminal)
+                    continue;
+                IGame terminalState = Rollout(nodeBatch[i].Game.Copy());
+                float rolloutValue = terminalState.Evaluate();
+                if (terminalState.Player == nodeBatch[i].Game.Player)
+                    rolloutValue = -rolloutValue;
+                rolloutValues[i] = MathF.Sign(rolloutValue);
             }
 
             // float[] valueEstimates = new float[nodeBatch.Length];
@@ -215,7 +215,10 @@ namespace MastersAlgorithms.Algorithms
             float[] values = new float[nodeBatch.Length];
             for (int i = 0; i < _batchSize; i++)
             {
-                values[i] = (1.0f - _lambda) * -valueEstimates[i] + _lambda * rolloutValues[i];
+                if (nodeBatch[i].IsTerminal)
+                    values[i] = rolloutValues[i];
+                else
+                    values[i] = (1.0f - _lambda) * -valueEstimates[i] + _lambda * rolloutValues[i];
             }
             return values;
         }
@@ -241,6 +244,7 @@ namespace MastersAlgorithms.Algorithms
                 {
                     // remove virtual losses
                     current.VisitCount -= _nVirtual;
+                    current.ValueSum += _nVirtual;
 
                     current.ValueSum += value;
                     current.VisitCount += 1;
