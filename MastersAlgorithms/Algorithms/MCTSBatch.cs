@@ -106,8 +106,8 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,5:F3} | VisitCount {4,6}"
-                                + " | Root Eval {5,5:F3} | Eval {6,5:F3}",
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,7:F2} | VisitCount {4,4}"
+                                + " | Root Eval {5,6:F3} | Eval {6,6:F3}",
                 _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount,
                 _rootValueArray![0], _value);
         }
