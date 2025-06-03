@@ -273,10 +273,11 @@ namespace MastersAlgorithms.Algorithms
             float noiseWeight = 0.25f,
             int nVirtual = 5,
             float c = 5f,
+            float temperature = 10.0f,
             bool deterministicSelection = true,
             bool verbose = false)
         {
-            AgentControllerBatch ac = new AgentControllerBatch(agent, c, deterministicSelection);
+            AgentControllerBatch ac = new AgentControllerBatch(agent, c, temperature, deterministicSelection);
             return new MCTSBatch(
                 maxIters: maxIters,
                 simulationPolicy: ac.SimulationPolicy,
@@ -296,12 +297,18 @@ namespace MastersAlgorithms.Algorithms
     {
         private Agent _agent;
         private float _c;
+        private float _temperature;
         private bool _deterministicSelection;
 
-        public AgentControllerBatch(Agent agent, float c = 5.0f, bool deterministicSelection = true)
+        public AgentControllerBatch(
+            Agent agent,
+            float c = 5.0f,
+            float temperature = 10.0f,
+            bool deterministicSelection = true)
         {
             _agent = agent;
             _c = c;
+            _temperature = temperature;
             _deterministicSelection = deterministicSelection;
         }
 
@@ -335,7 +342,7 @@ namespace MastersAlgorithms.Algorithms
             }
 
             float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
-            var output = _agent.Policy.GetMaskedProbsAndValues(obs, actionMasks, batchCount: stateCount);
+            var output = _agent.Policy.GetMaskedProbsAndValues(obs, actionMasks, batchCount: stateCount, t: _temperature);
 
             float[][] probs = new float[stateCount][];
             for (int i = 0; i < stateCount; i++)
@@ -353,39 +360,6 @@ namespace MastersAlgorithms.Algorithms
             float U = _c * node.PriorProbabiltity * MathF.Sqrt(node.Parent!.VisitCount) / (1 + node.VisitCount);
             return Q + U;
         }
-
-        // public (float[][], IMove[][]) PriorFunc(IGame[] states)
-        // {
-        //     int stateCount = states.Length;
-        //     int nPossibleMoves = states[0].PossibleMovesCount;
-
-        //     float[] obs = Utils.GetFlatObservations(states, _agent.ActorMode);
-        //     IMove[][] moves = new IMove[stateCount][];
-
-        //     bool[] actionMasks = new bool[nPossibleMoves * stateCount];
-        //     for (int i = 0; i < stateCount; i++)
-        //     {
-        //         bool[] currentActionMasks = states[i].GetActionMasks(out moves[i]);
-        //         Array.Copy(currentActionMasks, 0, actionMasks, i * nPossibleMoves, nPossibleMoves);
-        //     }
-
-        //     var probsFlat = _agent.Policy.GetMaskedProbs(obs, actionMasks, batchCount: stateCount);
-        //     float[][] probs = new float[stateCount][];
-        //     for (int i = 0; i < stateCount; i++)
-        //     {
-        //         probs[i] = new float[nPossibleMoves];
-        //         Array.Copy(probsFlat, i * nPossibleMoves, probs[i], 0, nPossibleMoves);
-        //     }
-
-        //     return (probs, moves);
-        // }
-
-        // public float[] ValueEstimator(IGame[] states)
-        // {
-        //     int stateCount = states.Length;
-        //     float[] obs = Utils.GetFlatObservations(states, _agent.CriticMode);
-        //     return _agent.Policy.GetValues(obs, batchCount: stateCount);
-        // }
 
     }
 }

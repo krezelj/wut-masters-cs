@@ -41,14 +41,14 @@ namespace MastersAlgorithms.ActorCritic
                 return ActorCritic!.Forward(input, batchCount).logits;
         }
 
-        public float[] GetProbs(float[] input, int batchCount = 1)
+        public float[] GetProbs(float[] input, int batchCount = 1, float t = 1.0f)
         {
-            return Utils.Softmax(GetLogits(input, batchCount), batchCount);
+            return Utils.Softmax(GetLogits(input, batchCount), batchCount, t);
         }
 
-        public float[] GetMaskedProbs(float[] input, bool[] mask, int batchCount = 1)
+        public float[] GetMaskedProbs(float[] input, bool[] mask, int batchCount = 1, float t = 1.0f)
         {
-            return Utils.MaskedSoftmax(GetLogits(input, batchCount), mask, batchCount);
+            return Utils.MaskedSoftmax(GetLogits(input, batchCount), mask, batchCount, t);
         }
 
         public float[] GetValues(float[] input, int batchCount = 1)
@@ -59,7 +59,11 @@ namespace MastersAlgorithms.ActorCritic
                 return ActorCritic!.Forward(input, batchCount).value;
         }
 
-        public (float[] probs, float[] values) GetMaskedProbsAndValues(float[] input, bool[] mask, int batchCount = 1)
+        public (float[] probs, float[] values) GetMaskedProbsAndValues(
+            float[] input,
+            bool[] mask,
+            int batchCount = 1,
+            float t = 1.0f)
         {
             float[] probs, values;
             if (!Unified)
@@ -70,7 +74,7 @@ namespace MastersAlgorithms.ActorCritic
             else
             {
                 (float[] logits, values) = ActorCritic!.Forward(input, batchCount);
-                probs = Utils.MaskedSoftmax(logits, mask, batchCount);
+                probs = Utils.MaskedSoftmax(logits, mask, batchCount, t);
             }
             return (probs, values);
         }
