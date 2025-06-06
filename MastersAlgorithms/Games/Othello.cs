@@ -26,6 +26,8 @@ namespace MastersAlgorithms.Games
 
         private int _player = BLACK;
         public int Player => _player;
+        public IMove? LastMove => throw new NotImplementedException();
+        public int MoveCounter => throw new NotImplementedException();
         private int _opponent => 1 - _player;
         private int _nullMoves = 0;
         private int _boardSize;

@@ -9,6 +9,9 @@ namespace MastersAlgorithms.Games
         public int PossibleMovesCount { get; }
         public int Player { get; }
 
+        public IMove? LastMove { get; }
+        public int MoveCounter { get; }
+
         bool IsOver { get; }
 
         public int Result { get; }

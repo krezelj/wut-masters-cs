@@ -49,6 +49,10 @@ namespace MastersAlgorithms.Games
 
         private sbyte _player = BLACK;
         public int Player => _player;
+        private IMove? _lastMove = null;
+        public IMove? LastMove => _lastMove;
+        private int _moveCounter = 0;
+        public int MoveCounter => _moveCounter;
         private sbyte _opponent => (sbyte)(1 - _player);
 
         public bool IsOver => EmptyMask == 0 || _nullMoves == 2;
@@ -312,6 +316,9 @@ namespace MastersAlgorithms.Games
 
         public void MakeMove(IMove m, bool updateMove = true)
         {
+            _lastMove = m;
+            _moveCounter++;
+
             BitOthelloMove move = (BitOthelloMove)m;
             if (move.IsNull)
             {
@@ -355,6 +362,9 @@ namespace MastersAlgorithms.Games
 
         public void UndoMove(IMove m)
         {
+            _lastMove = null;
+            _moveCounter--;
+
             BitOthelloMove move = (BitOthelloMove)m;
             SwitchPlayers();
             if (_useZobrist)
@@ -457,6 +467,8 @@ namespace MastersAlgorithms.Games
             newGame._nullMoves = _nullMoves;
             newGame._blackBoard = _blackBoard;
             newGame._whiteBoard = _whiteBoard;
+            newGame._lastMove = _lastMove;
+            newGame._moveCounter = _moveCounter;
             return newGame;
         }
 
