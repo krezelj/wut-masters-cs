@@ -11,7 +11,7 @@ namespace MastersAlgorithms.Algorithms
 
         public string GetDebugInfo()
         {
-            throw new NotImplementedException();
+            return "Bogo Debug Not Implemented";
         }
     }
 }
