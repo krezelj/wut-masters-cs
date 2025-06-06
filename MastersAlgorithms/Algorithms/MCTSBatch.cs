@@ -42,10 +42,20 @@ namespace MastersAlgorithms.Algorithms
                 }
             }
 
+            public void UpdateChildrenPriors(float[] probs, IMove[] moves)
+            {
+                int arrayIndex = 0;
+                foreach (var move in moves)
+                {
+                    Children![arrayIndex++].PriorProbabiltity = probs[move.Index];
+                }
+            }
+
             public Node GetBestChild(Func<Node[], Node> policy)
             {
                 return policy(Children!);
             }
+
             public int GetMostVisitedChildIdx()
             {
                 int max = 0;
@@ -60,6 +70,20 @@ namespace MastersAlgorithms.Algorithms
                 }
                 return idx;
             }
+
+            public Node GetChildByMoveIndex(int moveIdx, IMove[]? moves = null)
+            {
+                if (moves == null)
+                    moves = Game.GetMoves();
+
+                int arrayIndex = 0;
+                for (; arrayIndex < moves.Length; arrayIndex++)
+                    if (moves[arrayIndex].Index == moveIdx)
+                        break;
+
+                return Children![arrayIndex];
+            }
+
         }
 
         private long _nodes;
@@ -69,6 +93,8 @@ namespace MastersAlgorithms.Algorithms
         private float _value;
         private float[]? _rootValueArray;
         private Node? _bestChild;
+        private int _lastMoveCounter = -1;
+        private int _initialRootVisits;
 
         readonly int _maxIters;
         readonly Func<Node[], Node> _simulationPolicy;
@@ -78,6 +104,7 @@ namespace MastersAlgorithms.Algorithms
         readonly float _noiseAlpha;
         readonly float _noiseWeight;
         readonly int _nVirtual;
+        readonly bool _preserveSubtree;
         readonly bool _verbose;
 
         public MCTSBatch(
@@ -89,6 +116,7 @@ namespace MastersAlgorithms.Algorithms
             float noiseAlpha = 0.9f,
             float noiseWeight = 0.25f,
             int nVirtual = 5,
+            bool preserveSubtree = false,
             bool verbose = false
         )
         {
@@ -101,15 +129,16 @@ namespace MastersAlgorithms.Algorithms
             _noiseAlpha = noiseAlpha;
             _noiseWeight = noiseWeight;
             _nVirtual = nVirtual;
+            _preserveSubtree = preserveSubtree;
             _verbose = verbose;
         }
 
         public string GetDebugInfo()
         {
-            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,7:F2} | VisitCount {4,4}"
-                                + " | Root Eval {5,6:F3} | Eval {6,6:F3}",
+            return string.Format("Nodes {0,11} | {1,8:F2}kN/s | {2,6}ms | ValueSum {3,8:F2} | VisitCount {4,4}"
+                                + " | RVisits {5,5} | Root Eval {6,6:F3} | Eval {7,6:F3}",
                 _nodes, _nodes / _time, _time, _bestChild!.ValueSum, _bestChild!.VisitCount,
-                _rootValueArray![0], _value);
+                _initialRootVisits, _rootValueArray![0], _value);
         }
 
         public IMove? GetMove(IGame game)
@@ -121,19 +150,16 @@ namespace MastersAlgorithms.Algorithms
             // so disable it
             game = game.Copy(disableZobrist: true);
 
-            _root = new Node(game);
-            (var probs, var moves, _rootValueArray) = _probsAndValueFunc([_root.Game]);
-            var actionMasks = game.GetActionMasks(out _);
-            var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight, actionMasks);
-            _root.Expand(noisyProbs, moves[0]);
-            _root.VisitCount++;
+            InitialiseRoot(game);
+            _lastMoveCounter = game.MoveCounter;
+            _initialRootVisits = _root!.VisitCount;
 
             for (int i = 0; i < _maxIters; i++)
             {
                 BuildTree();
             }
 
-            int bestIdx = _root.GetMostVisitedChildIdx();
+            int bestIdx = _root!.GetMostVisitedChildIdx();
             _bestChild = _root.Children![bestIdx];
             _value = _bestChild.ValueSum / _bestChild.VisitCount;
 
@@ -141,7 +167,38 @@ namespace MastersAlgorithms.Algorithms
             if (_verbose)
                 Console.WriteLine(GetDebugInfo());
 
-            return game.GetMoves()[bestIdx];
+            IMove[] moves = game.GetMoves();
+            IMove bestMove = moves[bestIdx];
+            if (_preserveSubtree)
+                _root = _root.GetChildByMoveIndex(bestMove.Index, moves);
+            return bestMove;
+        }
+
+        private void InitialiseRoot(IGame game)
+        {
+            // TODO WARNING _lastMoveCounter > game.MoveCounter
+            // assumes that a game will never start from the same (or larger) moveCounter state
+            // then the previous game finished. With large enough n_random_moves this *could*
+            // be the case. Possible fix -- reset move counter after game generation and count
+            // only real moves
+            if (_root == null || !_preserveSubtree || _lastMoveCounter > game.MoveCounter)
+                _root = new Node(game);
+            else
+            {
+                _root = _root.GetChildByMoveIndex(game.LastMove!.Index);
+                _root.Parent = null;
+            }
+
+
+            (var probs, var moves, _rootValueArray) = _probsAndValueFunc([_root.Game]);
+            var actionMasks = game.GetActionMasks(out _);
+            var noisyProbs = Utils.AddDirichletNoise(probs[0], _noiseAlpha, _noiseWeight, actionMasks);
+
+            if (!_preserveSubtree || _root.Children == null)
+                _root.Expand(noisyProbs, moves[0]);
+            else
+                _root.UpdateChildrenPriors(noisyProbs, moves[0]);
+            // _root.VisitCount++;
         }
 
         private void BuildTree()
@@ -157,10 +214,6 @@ namespace MastersAlgorithms.Algorithms
 
         private Node[] Select()
         {
-            // TODO Consider adding something like AlphaZero
-            // When the node is selected add X loses to it
-            // to discourage from it being selected in subsequent iterations
-            // in backup, remove those loses
             Node[] currentBatch = new Node[_batchSize];
             for (int i = 0; i < _batchSize; i++)
             {
@@ -272,6 +325,7 @@ namespace MastersAlgorithms.Algorithms
             float noiseAlpha = 0.9f,
             float noiseWeight = 0.25f,
             int nVirtual = 5,
+            bool preserveSubtree = false,
             float c = 5f,
             float temperature = 10.0f,
             bool deterministicSelection = true,
@@ -287,6 +341,7 @@ namespace MastersAlgorithms.Algorithms
                 noiseAlpha: noiseAlpha,
                 noiseWeight: noiseWeight,
                 nVirtual: nVirtual,
+                preserveSubtree: preserveSubtree,
                 verbose: verbose
             );
         }

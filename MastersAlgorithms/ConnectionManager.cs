@@ -197,6 +197,7 @@ namespace MastersAlgorithms
                         noiseAlpha: float.Parse(Get("noiseAlpha", "0.9"), CultureInfo.InvariantCulture),
                         noiseWeight: float.Parse(Get("noiseWeight", "0.25"), CultureInfo.InvariantCulture),
                         nVirtual: int.Parse(Get("nVirtual", "1")),
+                        preserveSubtree: GetSwitch("preserveSubtree"),
                         c: float.Parse(Get("cPuct", "2.0"), CultureInfo.InvariantCulture),
                         temperature: float.Parse(Get("temperature", "10.0"), CultureInfo.InvariantCulture),
                         deterministicSelection: !GetSwitch("stochasticSelection"),
