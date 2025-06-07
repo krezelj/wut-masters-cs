@@ -17,6 +17,27 @@ namespace MastersAlgorithms.Games
             return new BitOthelloMove(0UL, nullMoves);
         }
 
+        public string Algebraic()
+        {
+            if (IsNull)
+                return "pa";
+
+            char col = (char)('a' + Index % BitOthello.BOARD_SIZE);
+            char row = (char)('1' + Index / BitOthello.BOARD_SIZE);
+            return $"{col}{row}";
+        }
+
+        public static BitOthelloMove FromAlgebraic(string s)
+        {
+            s = s.ToLower();
+            if (s == "pa")
+                return NullMove(0);
+
+            int index = (s[0] - 'a') + (s[1] - '1') * BitOthello.BOARD_SIZE;
+            ulong position = 1UL << index;
+            return new BitOthelloMove(position, 0);
+        }
+
         public override string ToString()
         {
             return $"{Index},{nullMoves},{FlipMask}";
@@ -41,8 +62,8 @@ namespace MastersAlgorithms.Games
             -1, -2, 5, 10, -20, -50, 100
         };
 
-        private const sbyte BLACK = 0;
-        private const sbyte WHITE = 1;
+        public const sbyte BLACK = 0;
+        public const sbyte WHITE = 1;
         private const sbyte EMPTY = 2;
         public const sbyte BOARD_SIZE = 8;
         public static readonly ulong CORNER_MASK = (0x1UL) | (0x1UL << 7) | (0x1UL << 56) | (0x1UL << 63);
@@ -537,7 +558,7 @@ namespace MastersAlgorithms.Games
             {
                 foreach (var move in moves)
                 {
-                    if (move.Index < 0)
+                    if (move.Index == BitOthelloMove.NullIndex)
                         continue;
                     int i = move.Index / BOARD_SIZE;
                     int j = move.Index % BOARD_SIZE;

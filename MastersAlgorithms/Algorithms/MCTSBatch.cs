@@ -93,7 +93,7 @@ namespace MastersAlgorithms.Algorithms
         private float _value;
         private float[]? _rootValueArray;
         private Node? _bestChild;
-        private int _lastMoveCounter = -1;
+        private int _lastMoveCounter = int.MaxValue;
         private int _initialRootVisits;
 
         readonly int _maxIters;

@@ -178,6 +178,13 @@ namespace MastersAlgorithms
             {
                 case "bogo":
                     return new Bogo();
+                case "edax":
+                    return new Edax(
+                        level: int.Parse(Get("level")),
+                        directory: Get("modelDirectory", Path.Join("external")),
+                        bookUsage: GetSwitch("bookUsage"),
+                        verbose: GetSwitch("verbose")
+                    );
                 case "minimax":
                     return new MinimaxFast(
                         depth: int.Parse(Get("depth")),
