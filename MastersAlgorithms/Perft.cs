@@ -7,12 +7,15 @@ namespace MastersAlgorithms
     public class Perft
     {
         private int _maxDepth;
+        private bool _reportUniqueGames;
+        private HashSet<string>? _uniqueGames;
         private ulong _leafNodes;
         private IGame? _game;
 
-        public Perft(int maxDepth)
+        public Perft(int maxDepth, bool reportUniqueGames = true)
         {
             _maxDepth = maxDepth;
+            _reportUniqueGames = reportUniqueGames;
         }
 
         public void Run(IGame game)
@@ -21,14 +24,15 @@ namespace MastersAlgorithms
             var sw = new Stopwatch();
             for (int depth = 1; depth <= _maxDepth; ++depth)
             {
+                _uniqueGames = new HashSet<string>();
                 _leafNodes = 0;
                 sw.Restart();
                 Search(depth);
                 sw.Stop();
 
                 float kns = _leafNodes / (float)sw.ElapsedTicks * Stopwatch.Frequency / 1000;
-                Console.WriteLine("depth {0,2} | {1,11} | {2,8}ms | {3,8}kN/s |",
-                    depth, _leafNodes, sw.ElapsedMilliseconds, MathF.Round(kns, 2));
+                Console.WriteLine("depth {0,2} | {1,11} | {2,8}ms | {3,8}kN/s | {4,10} Unique |",
+                    depth, _leafNodes, sw.ElapsedMilliseconds, MathF.Round(kns, 2), _uniqueGames.Count);
             }
         }
 
@@ -36,6 +40,9 @@ namespace MastersAlgorithms
         {
             if (depth == 0 || _game!.IsOver)
             {
+                if (depth == 0 && _reportUniqueGames)
+                    _uniqueGames!.Add(_game!.ToString()!);
+
                 _leafNodes++;
                 return;
             }
