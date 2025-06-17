@@ -183,6 +183,7 @@ namespace MastersAlgorithms
                         level: int.Parse(Get("level")),
                         directory: Get("modelDirectory", Path.Join("external")),
                         bookUsage: GetSwitch("bookUsage"),
+                        stateful: GetSwitch("stateful"),
                         verbose: GetSwitch("verbose")
                     );
                 case "minimax":

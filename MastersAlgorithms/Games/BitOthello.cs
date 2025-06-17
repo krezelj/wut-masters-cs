@@ -29,11 +29,12 @@ namespace MastersAlgorithms.Games
 
         public static BitOthelloMove FromAlgebraic(string s)
         {
-            s = s.ToLower();
-            if (s == "pa")
+            // assume upper case for performance
+            // s = s.ToLower();
+            if (s == "PA")
                 return NullMove(0);
 
-            int index = (s[0] - 'a') + (s[1] - '1') * BitOthello.BOARD_SIZE;
+            int index = (s[0] - 'A') + (s[1] - '1') * BitOthello.BOARD_SIZE;
             ulong position = 1UL << index;
             return new BitOthelloMove(position, 0);
         }

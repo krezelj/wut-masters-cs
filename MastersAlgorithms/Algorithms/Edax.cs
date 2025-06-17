@@ -11,50 +11,39 @@ namespace MastersAlgorithms.Algorithms
 {
     public class Edax : IAlgorithm
     {
-        static ConcurrentQueue<string> stderrLines = new ConcurrentQueue<string>();
-        Thread _stderrThread;
-        StreamWriter _stdin;
-        StreamReader _stdout;
+        Thread _stderrThread = null!;
+        Process _process = null!;
+        ProcessStartInfo _processInfo = null!;
+        StreamWriter _stdin = null!;
+        StreamReader _stdout = null!;
         private int _lastMoveCounter;
         private string _output;
         private string _errorMessage;
+        private bool _stateful;
         private bool _verbose;
+        private BitOthello _game = null!;
 
-        public Edax(int level, string directory, bool bookUsage = false, bool verbose = false)
+        public Edax(int level, string directory, bool bookUsage = false, bool stateful = true, bool verbose = false)
         {
             _output = "";
             _errorMessage = "";
             _lastMoveCounter = int.MaxValue;
+            _stateful = stateful;
             _verbose = verbose;
 
             string exePath = Path.Join(directory, "wEdax-x86-64-v3.exe");
 
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.FileName = exePath;
-            info.Arguments = $"--verbose 0 --level {level} --book-usage {(bookUsage ? "on" : "off")}";
-            info.WorkingDirectory = directory;
-            info.UseShellExecute = false;
-            info.RedirectStandardInput = true;
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = true;
-            info.CreateNoWindow = true;
+            _processInfo = new ProcessStartInfo();
+            _processInfo.FileName = exePath;
+            _processInfo.Arguments = $"--verbose 0 --level {level} --book-usage {(bookUsage ? "on" : "off")}";
+            _processInfo.WorkingDirectory = directory;
+            _processInfo.UseShellExecute = false;
+            _processInfo.RedirectStandardInput = true;
+            _processInfo.RedirectStandardOutput = true;
+            _processInfo.RedirectStandardError = true;
+            _processInfo.CreateNoWindow = true;
 
-            var process = Process.Start(info)!;
-
-            _stdin = process.StandardInput;
-            _stdin.AutoFlush = true;
-            _stdout = process.StandardOutput;
-
-            _stderrThread = new Thread(() =>
-            {
-                string? line;
-                while ((line = process.StandardError.ReadLine()) != null)
-                {
-                    stderrLines.Enqueue(line);
-                }
-            });
-            _stderrThread.IsBackground = true;
-            _stderrThread.Start();
+            InitProcess(_processInfo);
         }
 
         public string GetDebugInfo()
@@ -64,13 +53,14 @@ namespace MastersAlgorithms.Algorithms
 
         public IMove? GetMove(IGame g)
         {
-            var game = (g as BitOthello)!;
+            _errorMessage = "";
+            _game = (g as BitOthello)!;
             bool canContinue = true;
-            if (_lastMoveCounter >= game.MoveCounter) // new game has started
-                SetGame(game);
+            if (!_stateful || _lastMoveCounter >= _game.MoveCounter)
+                SetGame();
             else // old game still going, update using the last move
-                canContinue = TryWriteMove(game.LastMove!);
-            _lastMoveCounter = game.MoveCounter;
+                canContinue = TryWriteMove(_game.LastMove!);
+            _lastMoveCounter = _game.MoveCounter;
 
             IMove? move = null;
             if (canContinue)
@@ -87,12 +77,12 @@ namespace MastersAlgorithms.Algorithms
 
                 // in this case the game is already pretty much finished so we can just
                 // return the only move available which *should* be the null move
-                var moves = game.GetMoves();
+                var moves = _game.GetMoves();
                 if (moves[0].Index != BitOthelloMove.NullIndex)
                     throw new Exception("Edax could not continue, but the only move left is not null. " +
-                    $"state: {game} last move: {(game.LastMove as BitOthelloMove)!.Algebraic()}");
+                    $"state: {_game} last move: {(_game.LastMove as BitOthelloMove)!.Algebraic()}");
 
-                stderrLines.TryDequeue(out _errorMessage!);
+                _output = "Move Skipped";
                 move = moves[0];
             }
 
@@ -102,24 +92,37 @@ namespace MastersAlgorithms.Algorithms
             return move;
         }
 
-        void SetGame(BitOthello game)
+        void InitProcess(ProcessStartInfo info)
         {
-            StringBuilder command = new StringBuilder("setboard ");
-            command.Append(game.ToString()[..^2]);
-            command.Append($" {(game.Player == BitOthello.BLACK ? 'X' : 'O')}");
-            _stdin.WriteLine(command.ToString());
-            // _ = _stdout.ReadLine()!; // ignore prompt
+            _process = Process.Start(info)!;
+
+            _stdin = _process.StandardInput;
+            _stdin.AutoFlush = true;
+            _stdout = _process.StandardOutput;
+
+            _stderrThread = new Thread(() =>
+            {
+                while (true)
+                {
+                    _process.StandardError.ReadLine();
+                }
+            });
+            _stderrThread.IsBackground = true;
+            _stderrThread.Start();
+        }
+
+        void SetGame()
+        {
+            string command = $"setboard {_game.ToString()[..^2]} {(_game.Player == BitOthello.BLACK ? 'X' : 'O')}";
+            _stdin.WriteLine(command);
         }
 
         bool TryWriteMove(IMove move)
         {
             _stdin.WriteLine((move as BitOthelloMove)!.Algebraic());
-            if (CheckForWarnings())
+            if (CheckForEarlyGameOver())
                 return false;
 
-            _ = _stdout.ReadLine()!; // ignore prompt
-            _ = _stdout.ReadLine()!; // ignore whitespace
-            _ = _stdout.ReadLine()!; // ignore feedback
             return true;
         }
 
@@ -132,22 +135,37 @@ namespace MastersAlgorithms.Algorithms
             while (true)
             {
                 _output = _stdout.ReadLine()!;
-                if (_output.Length <= 1) // clear prompts and white spaces
+                if (_output.Length <= 2)
+                    continue;
+                if (_output.Contains("Game Over"))
+                    return false;
+                if (!_output.StartsWith("Edax plays"))
                     continue;
                 break;
             }
-
-            if (_output == "*** Game Over ***")
-                return false;
 
             move = BitOthelloMove.FromAlgebraic(_output[^2..]);
             return true;
         }
 
-        bool CheckForWarnings()
+        bool CheckForEarlyGameOver()
         {
-            Thread.Sleep(1);
-            return stderrLines.TryDequeue(out _errorMessage!);
+            IGame game = _game.Copy(true);
+            var moves = game.GetMoves();
+            if (moves[0].Index != BitOthelloMove.NullIndex)
+                return false; // not a null move, game is still going
+
+            game.MakeMove(moves[0], false); // make that null move to update the game state
+            moves = game.GetMoves();
+            bool earlyGameOver = moves[0].Index == BitOthelloMove.NullIndex;
+            game.UndoMove(moves[0]); // undo the null move
+            return earlyGameOver;
         }
+
+        //bool CheckForWarnings()
+        //{
+        //    // Thread.Sleep(1);
+        //    return stderrLines.TryDequeue(out _errorMessage!);
+        //}
     }
 }
