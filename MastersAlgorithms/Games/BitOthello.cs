@@ -110,7 +110,7 @@ namespace MastersAlgorithms.Games
         {
             get
             {
-                if (_player == 0)
+                if (_player == BLACK)
                     return ref _blackBoard;
                 else
                     return ref _whiteBoard;
@@ -120,7 +120,7 @@ namespace MastersAlgorithms.Games
         {
             get
             {
-                if (_player == 1)
+                if (_player == WHITE)
                     return ref _blackBoard;
                 else
                     return ref _whiteBoard;
@@ -525,7 +525,7 @@ namespace MastersAlgorithms.Games
 
         public bool[] GetActionMasks(out IMove[] moves)
         {
-            bool[] mask = new bool[65];
+            bool[] mask = new bool[PossibleMovesCount];
             moves = GetMoves();
 
             foreach (IMove move in moves)
@@ -593,6 +593,7 @@ namespace MastersAlgorithms.Games
         {
             _player = (sbyte)(1 - _player);
         }
+
         public override string ToString()
         {
             char[] chars = new char[BOARD_SIZE * BOARD_SIZE + 2];
