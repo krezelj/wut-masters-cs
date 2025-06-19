@@ -197,6 +197,7 @@ namespace MastersAlgorithms
                     return new MinimaxFast(
                         depth: int.Parse(Get("depth")),
                         evalFunc: GetEvalFunc(),
+                        sortFunc: (game, moves, idx) => game.SortMoves(moves, idx),
                         verbose: false
                     );
                 case "mcts":
@@ -216,6 +217,14 @@ namespace MastersAlgorithms
                         c: float.Parse(Get("cPuct", "2.0"), CultureInfo.InvariantCulture),
                         temperature: float.Parse(Get("temperature", "10.0"), CultureInfo.InvariantCulture),
                         deterministicSelection: !GetSwitch("stochasticSelection"),
+                        verbose: false
+                    );
+                case "minimaxHybrid":
+                    return MinimaxFast.GetAgentMinimax(
+                        depth: int.Parse(Get("depth")),
+                        agent: GetAgent(),
+                        temperature: float.Parse(Get("temperature", "10.0"), CultureInfo.InvariantCulture),
+                        probThreshold: float.Parse(Get("floatThreshold", "0.01"), CultureInfo.InvariantCulture),
                         verbose: false
                     );
                 default:
