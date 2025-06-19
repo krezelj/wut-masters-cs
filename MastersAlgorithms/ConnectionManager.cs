@@ -108,6 +108,10 @@ namespace MastersAlgorithms
                 case "undoMove":
                     UndoMove();
                     break;
+                case "isOver":
+                    return _games[Get("game")].IsOver.ToString();
+                case "result":
+                    return _games[Get("game")].Result.ToString();
                 case "evaluate":
                     return _games[Get("game")].Evaluate().ToString();
                 case "getString":

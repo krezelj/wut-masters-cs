@@ -403,14 +403,29 @@ namespace MastersAlgorithms.Games
 
         public override string ToString()
         {
-            var obs = GetFlatObservation();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < obs.Length; i++)
+            char[] chars = new char[HEIGHT * WIDTH + 1];
+
+            ulong tmp = _redBoard;
+            while (tmp > 0)
             {
-                sb.Append(obs[i] == 1.0f ? "1" : "0");
+                int idx = CellIndexFromBitboard(tmp.PopNextPosition().Index());
+                chars[idx] = 'X';
             }
-            sb.Append(_player == RED ? "0" : "1");
-            return sb.ToString();
+            tmp = _yellowBoard;
+            while (tmp > 0)
+            {
+                int idx = CellIndexFromBitboard(tmp.PopNextPosition().Index());
+                chars[idx] = 'O';
+            }
+            tmp = EmptyMask;
+            while (tmp > 0)
+            {
+                int idx = CellIndexFromBitboard(tmp.PopNextPosition().Index());
+                chars[idx] = '.';
+            }
+
+            chars[^1] = (char)(_player + '0');
+            return new string(chars);
         }
     }
 }
