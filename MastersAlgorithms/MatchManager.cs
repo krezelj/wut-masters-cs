@@ -22,6 +22,7 @@ namespace MastersAlgorithms
         public int NGames;
         public bool MirrorGames;
         public int NRandomMoves;
+        private bool _verbose;
         public int[,] Results;
         public float[] PlayerTimes;
         public int[] PlayerMoveCount;
@@ -31,13 +32,15 @@ namespace MastersAlgorithms
             Type gameType,
             int nGames,
             bool mirrorGames,
-            int nRandomMoves)
+            int nRandomMoves,
+            bool verbose = false)
         {
             Players = players;
             GameType = gameType;
             NGames = nGames;
             MirrorGames = mirrorGames;
             NRandomMoves = nRandomMoves;
+            _verbose = verbose;
 
             int possibleResultsCount = (int)GameType.GetProperty("PossibleResultsCount")!.GetValue(null)!;
             Results = new int[possibleResultsCount, Players.Length];
@@ -57,12 +60,16 @@ namespace MastersAlgorithms
 
         public void Run()
         {
+            int gameCounter = 0;
             foreach (var gameData in GetGames())
             {
                 int firstPlayerIndex = 0;
                 if (gameData.IsMirrored)
                     firstPlayerIndex = (firstPlayerIndex + 1) % Players.Length;
                 var gameRunner = new GameRunner(gameData.Game, Players, firstPlayerIndex);
+                gameCounter++;
+                if (_verbose)
+                    Console.WriteLine($"Running Game {gameCounter}/{NGames * (MirrorGames ? 2 : 1)}");
                 gameRunner.Run();
                 for (int i = 0; i < Players.Length; i++)
                 {
