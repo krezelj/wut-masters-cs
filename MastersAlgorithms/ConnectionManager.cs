@@ -138,8 +138,11 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
-                // case "connectFour":
-                //     return new ConnectFour(state);
+                case "connectFour":
+                    if (state != "")
+                        throw new NotImplementedException("BitOthello has no constructor which accepts `state`");
+                    else
+                        return new BitConnectFour(useZobrist: GetSwitch("useZobrist"));
                 case "othello":
                     if (state != "")
                         return new BitOthello(state, useZobrist: GetSwitch("useZobrist"));
@@ -154,8 +157,8 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
-                // case "connect-four":
-                //     return new ConnectFour(state);
+                case "connectFour":
+                    return typeof(BitConnectFour);
                 case "othello":
                     return typeof(BitOthello);
                 default:

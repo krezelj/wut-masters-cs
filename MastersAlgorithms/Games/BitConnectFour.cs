@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MastersAlgorithms.Games
 {
@@ -39,6 +34,7 @@ namespace MastersAlgorithms.Games
             ];
 
         public int PossibleMovesCount => WIDTH;
+        public static int PossibleResultsCount => 3;
 
         private sbyte _player = RED;
         public int Player => _player;
@@ -55,12 +51,26 @@ namespace MastersAlgorithms.Games
             get
             {
                 return EmptyMask == 0
-                    || ConnectionsFromPositions(_redBoard, RED) > 0
-                    || ConnectionsFromPositions(_yellowBoard, YELLOW) > 0;
+                    || ConnectionsFromPositions(_redBoard) > 0
+                    || ConnectionsFromPositions(_yellowBoard) > 0;
             }
         }
 
-        public int Result => throw new NotImplementedException();
+        public int Result
+        {
+            get
+            {
+                if (!IsOver)
+                    return -1;
+
+                if (ConnectionsFromPositions(_redBoard) > 0) // red has connections
+                    return RED;
+                if (ConnectionsFromPositions(_yellowBoard) > 0) // yellow has connections
+                    return YELLOW;
+
+                return PossibleResultsCount - 1; // draw
+            }
+        }
 
         private sbyte[] _columns;
         private ulong _redBoard;
@@ -164,7 +174,15 @@ namespace MastersAlgorithms.Games
 
         public IMove GetRandomMove()
         {
-            throw new NotImplementedException();
+            ulong lastRowMask = 0b1111111UL.ShiftVertical(HEIGHT - 1);
+            if (((_redBoard | _yellowBoard) & lastRowMask) > 0) // some columns are filled
+            {
+                var moves = GetMoves();
+                return moves[Utils.RNG.Next(moves.Length)];
+            }
+
+            // if all columns are not filled, generate random action
+            return new BitConnectFourMove((sbyte)Utils.RNG.Next(PossibleMovesCount));
         }
 
         public void MakeMove(IMove move, bool updateMove = true)
@@ -207,9 +225,8 @@ namespace MastersAlgorithms.Games
             }
         }
 
-        public int ConnectionsFromPositions(ulong positions, sbyte player, int depth = 3)
+        public int ConnectionsFromPositions(ulong positions, int depth = 3)
         {
-            ulong board = player == _player ? PlayerBoard : OpponentBoard;
             int connections = 0;
             for (int i = 0; i < _directions.Length; i++)
             {
@@ -217,7 +234,7 @@ namespace MastersAlgorithms.Games
                 for (int d = 0; d < depth; d++)
                 {
                     // shift horizontal can shift rows up as well if offset is large enough
-                    mask = mask.ShiftHorizontal(_directions[i]) & board;
+                    mask = mask.ShiftHorizontal(_directions[i]) & positions;
                     if (mask == 0)
                         break;
                 }
@@ -228,7 +245,27 @@ namespace MastersAlgorithms.Games
 
         public float Evaluate()
         {
-            throw new NotImplementedException();
+            // TODO possible improvements
+            // directions should be weighted since it's easier to block a vertical connections
+
+            float value;
+            if (IsOver)
+            {
+                if (ConnectionsFromPositions(_redBoard) > 0)
+                    value = 1e6f;
+                else if (ConnectionsFromPositions(_yellowBoard) > 0)
+                    value = -1e6f;
+                else
+                    value = 0.0f;
+            }
+            else
+            {
+                ulong _redMask = ~MASK & ~_yellowBoard;
+                ulong _yellowMask = ~MASK & ~_redBoard;
+                value = ConnectionsFromPositions(_redMask) - ConnectionsFromPositions(_yellowMask);
+            }
+
+            return value * (_player == RED ? 1 : -1);
         }
 
         public float MobilityEvaluate()
@@ -299,7 +336,10 @@ namespace MastersAlgorithms.Games
 
         public void SortMoves(ref IMove[] moves, int moveIndex)
         {
-            throw new NotImplementedException();
+            // couldn't be bothered to implement this and
+            // it's not really necessary for the thesis
+
+            // throw new NotImplementedException();
         }
 
         public void SwitchPlayers()
@@ -369,6 +409,7 @@ namespace MastersAlgorithms.Games
             {
                 sb.Append(obs[i] == 1.0f ? "1" : "0");
             }
+            sb.Append(_player == RED ? "0" : "1");
             return sb.ToString();
         }
     }
