@@ -22,7 +22,7 @@ namespace MastersAlgorithms.Games
 
         IMove GetRandomMove();
 
-        void SortMoves(ref IMove[] moves, int moveIndex);
+        IMove[] SortMoves(IMove[] moves, int moveIndex);
 
         void MakeMove(IMove move, bool updateMove = true);
 

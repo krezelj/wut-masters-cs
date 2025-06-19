@@ -263,7 +263,7 @@ namespace MastersAlgorithms.Games
             return BitOthelloMove.NullMove(_nullMoves);
         }
 
-        public void SortMoves(ref IMove[] moves, int moveIndex)
+        public IMove[] SortMoves(IMove[] moves, int moveIndex)
         {
             var moveScores = new int[moves.Length];
             for (int i = 0; i < moves.Length; ++i)
@@ -285,6 +285,8 @@ namespace MastersAlgorithms.Games
             }
 
             Array.Sort(moveScores, moves);
+
+            return moves;
         }
 
         public IMove GetMoveFromString(string m)

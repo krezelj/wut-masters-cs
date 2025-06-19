@@ -334,12 +334,12 @@ namespace MastersAlgorithms.Games
             return obs;
         }
 
-        public void SortMoves(ref IMove[] moves, int moveIndex)
+        public IMove[] SortMoves(IMove[] moves, int moveIndex)
         {
             // couldn't be bothered to implement this and
             // it's not really necessary for the thesis
 
-            // throw new NotImplementedException();
+            return moves;
         }
 
         public void SwitchPlayers()

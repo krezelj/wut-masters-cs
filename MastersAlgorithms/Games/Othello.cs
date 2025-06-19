@@ -149,7 +149,7 @@ namespace MastersAlgorithms.Games
             return moves[Utils.RNG.Next(moves.Length)];
         }
 
-        public void SortMoves(ref IMove[] moves, int moveIndex)
+        public IMove[] SortMoves(IMove[] moves, int moveIndex)
         {
             throw new NotImplementedException();
         }
