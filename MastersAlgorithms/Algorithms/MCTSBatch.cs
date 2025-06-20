@@ -238,7 +238,6 @@ namespace MastersAlgorithms.Algorithms
 
         private void Expand(Node[] nodeBatch, float[][] priorsBatch, IMove[][] movesBatch)
         {
-            // (var priorsBatch, var movesBatch) = _priorFunc(stateBatch);
             for (int i = 0; i < _batchSize; i++)
             {
                 if (nodeBatch[i].IsTerminal)
@@ -260,10 +259,6 @@ namespace MastersAlgorithms.Algorithms
                     rolloutValue = -rolloutValue;
                 rolloutValues[i] = MathF.Sign(rolloutValue);
             }
-
-            // float[] valueEstimates = new float[nodeBatch.Length];
-            // if (_lambda < 1.0f)
-            //     valueEstimates = _valueEstimator(stateBatch);
 
             float[] values = new float[nodeBatch.Length];
             for (int i = 0; i < _batchSize; i++)
