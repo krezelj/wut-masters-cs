@@ -493,6 +493,8 @@ namespace MastersAlgorithms.Games
             newGame._whiteBoard = _whiteBoard;
             newGame._lastMove = _lastMove;
             newGame._moveCounter = _moveCounter;
+            if (!disableZobrist)
+                newGame.SetZobristHash();
             return newGame;
         }
 
