@@ -88,6 +88,12 @@ namespace MastersAlgorithms.Games
             bitboard &= bitboard - 1;
         }
 
+        public static IEnumerable<ulong> EnumerateBits(this ulong bitboard)
+        {
+            while (bitboard > 0)
+                yield return bitboard.PopNextPosition();
+        }
+
         public static bool Contains(this ulong bitboard, ulong position)
         {
             return (bitboard & position) > 0;
@@ -153,6 +159,17 @@ namespace MastersAlgorithms.Games
 
 
             return bitboard | left | right | up | down | upLeft | upRight | downLeft | downRight;
+        }
+
+        public static ulong ReverseBits(this ulong x)
+        {
+            x = ((x >> 1) & 0x5555555555555555UL) | ((x & 0x5555555555555555UL) << 1);
+            x = ((x >> 2) & 0x3333333333333333UL) | ((x & 0x3333333333333333UL) << 2);
+            x = ((x >> 4) & 0x0F0F0F0F0F0F0F0FUL) | ((x & 0x0F0F0F0F0F0F0F0FUL) << 4);
+            x = ((x >> 8) & 0x00FF00FF00FF00FFUL) | ((x & 0x00FF00FF00FF00FFUL) << 8);
+            x = ((x >> 16) & 0x0000FFFF0000FFFFUL) | ((x & 0x0000FFFF0000FFFFUL) << 16);
+            x = (x >> 32) | (x << 32);
+            return x;
         }
 
         public static string String(this ulong bitboard)
