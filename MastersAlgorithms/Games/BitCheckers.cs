@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 
 namespace MastersAlgorithms.Games
@@ -81,9 +82,7 @@ namespace MastersAlgorithms.Games
         public const sbyte WHITE = 1;
         public const sbyte KING = 2;
         public const sbyte EMPTY = 3;
-        public const sbyte NORMAL = 0;
-        public const sbyte BLACK_IS_CAPTURING = 1;
-        public const sbyte WHITE_IS_CAPTURING = 2;
+        public const sbyte NONE = 127;
         public const sbyte BOARD_SIZE = 8;
         private const ulong MASK = 0xFFFFFFFF00000000UL;
         private const ulong L3 = 0x00000000_00E0E0E0UL;
@@ -126,7 +125,7 @@ namespace MastersAlgorithms.Games
                     return true;
 
                 // check for legal moves
-                return AnyLegalMoves();
+                return !AnyLegalMoves();
             }
         }
 
@@ -134,7 +133,20 @@ namespace MastersAlgorithms.Games
         {
             get
             {
-                throw new NotImplementedException();
+                if (!IsOver)
+                    return -1;
+
+                int whiteCount = BitOperations.PopCount(_whiteBoard);
+                if (whiteCount == 0)
+                    return BLACK; // black won
+
+                int blackCount = BitOperations.PopCount(_blackBoard);
+                if (blackCount == 0)
+                    return WHITE; // white won
+
+                // we know the game is over but both players still have pieces
+                // on board so it must be a draw
+                return PossibleResultsCount - 1;
             }
         }
 
@@ -168,8 +180,7 @@ namespace MastersAlgorithms.Games
         public ulong EmptyMask => (~_whiteBoard) & (~_blackBoard) & (~MASK);
         private bool _useZobrist;
         private ZobristHash? _zobristHash;
-        // public ulong zKey => _useZobrist ? _zobristHash!.Key : throw new Exception("ZobristHash is not used.");
-        public ulong zKey => throw new NotImplementedException();
+        public ulong zKey => _useZobrist ? _zobristHash!.Key : throw new Exception("ZobristHash is not used.");
 
         public BitCheckers() : this(BLACK, true) { } // dummy parameterless constructor;
 
@@ -180,9 +191,6 @@ namespace MastersAlgorithms.Games
             // white starts on top
             _blackBoard = 0xFFF00000UL;
             _whiteBoard = 0x00000FFFUL;
-
-            // _blackBoard = 0xFFE10000UL;
-            // _whiteBoard = 0x00002DFFUL;
 
             _useZobrist = useZobrist;
             if (_useZobrist)
@@ -306,15 +314,11 @@ namespace MastersAlgorithms.Games
 
         public bool AnyLegalMoves()
         {
-            bool opponentIsCapturing =
-                (_capturingPlayer == WHITE_IS_CAPTURING && _player == BLACK) ||
-                (_capturingPlayer == BLACK_IS_CAPTURING && _player == WHITE);
+            bool opponentIsCapturing = _capturingPlayer == _opponent;
             if (opponentIsCapturing)
                 return true;
 
-            bool playerIsCapturing =
-                (_capturingPlayer == WHITE_IS_CAPTURING && _player == WHITE) ||
-                (_capturingPlayer == BLACK_IS_CAPTURING && _player == BLACK);
+            bool playerIsCapturing = _capturingPlayer == _player;
             if (playerIsCapturing)
                 return true;
 
@@ -346,9 +350,7 @@ namespace MastersAlgorithms.Games
 
         public IMove[] GetMoves()
         {
-            bool opponentIsCapturing =
-                (_capturingPlayer == WHITE_IS_CAPTURING && _player == BLACK) ||
-                (_capturingPlayer == BLACK_IS_CAPTURING && _player == WHITE);
+            bool opponentIsCapturing = _capturingPlayer == _opponent;
             if (opponentIsCapturing)
             {
                 // opponent is mid capture, force null move
@@ -361,9 +363,7 @@ namespace MastersAlgorithms.Games
             ulong empty = EmptyMask;
 
             bool doMirror = _player == WHITE;
-            bool playerIsCapturing =
-                (_capturingPlayer == WHITE_IS_CAPTURING && _player == WHITE) ||
-                (_capturingPlayer == BLACK_IS_CAPTURING && _player == BLACK);
+            bool playerIsCapturing = _capturingPlayer == _player;
 
             if (doMirror)
             {
@@ -498,18 +498,20 @@ namespace MastersAlgorithms.Games
             // handle multi jump sequences
             if (multiJump)
             {
-                _capturingPlayer = _player == WHITE ? WHITE_IS_CAPTURING : BLACK_IS_CAPTURING;
+                _capturingPlayer = _player;
                 _forcedStartPosition = move.EndPosition;
             }
             else
             {
                 _forcedStartPosition = 0UL;
-                _capturingPlayer = NORMAL;
+                _capturingPlayer = NONE;
             }
 
             // handle state updates
             if (!move.IsCapture && !move.IsPromotion)
                 _movesWithoutActivity++;
+            else
+                _movesWithoutActivity = 0;
             SwitchPlayers();
             if (_useZobrist)
             {
@@ -572,7 +574,23 @@ namespace MastersAlgorithms.Games
 
         public float Evaluate()
         {
-            throw new NotImplementedException();
+            int whiteCount = BitOperations.PopCount(_whiteBoard);
+            int blackCount = BitOperations.PopCount(_blackBoard);
+            float value = 0.0f;
+            if (IsOver)
+            {
+                if (whiteCount == 0)
+                    value = 1e6f;
+                if (blackCount == 0)
+                    value = -1e6f;
+                return value * (_player == BLACK ? 1 : -1);
+            }
+
+            int whiteKingCount = BitOperations.PopCount(_whiteBoard & _kings);
+            int blackKingCount = BitOperations.PopCount(_blackBoard & _kings);
+
+            value = blackCount + 3 * blackKingCount - whiteCount - 3 * whiteKingCount;
+            return value * (_player == BLACK ? 1 : -1);
         }
 
         public float MobilityEvaluate()
