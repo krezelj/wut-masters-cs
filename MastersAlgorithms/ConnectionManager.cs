@@ -142,9 +142,14 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
+                case "checkers":
+                    if (state != "")
+                        throw new NotImplementedException("BitChecers has no constructor which accepts `state`");
+                    else
+                        return new BitCheckers(useZobrist: GetSwitch("useZobrist"));
                 case "connectFour":
                     if (state != "")
-                        throw new NotImplementedException("BitOthello has no constructor which accepts `state`");
+                        throw new NotImplementedException("BitConnectFour has no constructor which accepts `state`");
                     else
                         return new BitConnectFour(useZobrist: GetSwitch("useZobrist"));
                 case "othello":
@@ -161,6 +166,8 @@ namespace MastersAlgorithms
         {
             switch (name)
             {
+                case "checkers":
+                    return typeof(BitCheckers);
                 case "connectFour":
                     return typeof(BitConnectFour);
                 case "othello":

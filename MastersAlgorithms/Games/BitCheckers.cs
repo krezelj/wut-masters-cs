@@ -71,7 +71,7 @@ namespace MastersAlgorithms.Games
 
         public override string ToString()
         {
-            return $"{startPosition},{endPosition},{isForced},{isCapture},{IsKingCapture},{CaptureMask},"
+            return $"{Index},{startPosition},{endPosition},{isForced},{isCapture},{IsKingCapture},{CaptureMask},"
                 + $"{isPromotion},{previousState},{previousMovesWithoutActivity}";
         }
     }
@@ -627,29 +627,31 @@ namespace MastersAlgorithms.Games
 
         public IMove GetMoveFromString(string m)
         {
-            // 0 -- startPosition
-            // 1 -- endPositon
-            // 2 -- isForced
-            // 3 -- isCapture
-            // 4 -- isKingCapture
-            // 5 -- captureMask
-            // 6 -- isPromotion
-            // 7 -- prevState
-            // 8 -- prevMovesWithoutActivity
+            // 0 -- index
+            // 1 -- startPosition
+            // 2 -- endPositon
+            // 3 -- isForced
+            // 4 -- isCapture
+            // 5 -- isKingCapture
+            // 6 -- captureMask
+            // 7 -- isPromotion
+            // 8 -- prevState
+            // 9 -- prevMovesWithoutActivity
 
             string[] data = m.Split(',');
-            ulong startPosition = ulong.Parse(data[0]);
+            int index = int.Parse(data[0]);
             sbyte previousState = sbyte.Parse(data[^2]);
             sbyte previousMovesWithoutActivity = sbyte.Parse(data[^1]);
-            if (startPosition == BitCheckersMove.NullIndex)
+            if (index == BitCheckersMove.NullIndex)
                 return BitCheckersMove.NullMove(previousState, previousMovesWithoutActivity);
 
-            ulong endPosition = ulong.Parse(data[1]);
-            bool isForced = bool.Parse(data[2]);
-            bool isCapture = bool.Parse(data[3]);
-            bool isKingCapture = bool.Parse(data[4]);
-            ulong captureMask = ulong.Parse(data[5]);
-            bool isPromotion = bool.Parse(data[6]);
+            ulong startPosition = ulong.Parse(data[1]);
+            ulong endPosition = ulong.Parse(data[2]);
+            bool isForced = bool.Parse(data[3]);
+            bool isCapture = bool.Parse(data[4]);
+            bool isKingCapture = bool.Parse(data[5]);
+            ulong captureMask = ulong.Parse(data[6]);
+            bool isPromotion = bool.Parse(data[7]);
             BitCheckersMove move = new BitCheckersMove(
                 startPosition,
                 endPosition,
@@ -787,14 +789,16 @@ namespace MastersAlgorithms.Games
             ulong tmp = _blackBoard;
             while (tmp > 0)
             {
-                int idx = tmp.PopNextPosition().Index();
-                chars[idx] = 'X';
+                ulong position = tmp.PopNextPosition();
+                int idx = position.Index();
+                chars[idx] = (position & _kings) > 0 ? 'X' : 'x';
             }
             tmp = _whiteBoard;
             while (tmp > 0)
             {
-                int idx = tmp.PopNextPosition().Index();
-                chars[idx] = 'O';
+                ulong position = tmp.PopNextPosition();
+                int idx = position.Index();
+                chars[idx] = (position & _kings) > 0 ? 'O' : 'o';
             }
             tmp = EmptyMask;
             while (tmp > 0)
