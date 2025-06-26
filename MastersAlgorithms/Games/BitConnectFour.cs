@@ -148,7 +148,7 @@ namespace MastersAlgorithms.Games
             {
                 newGame._columns[i] = _columns[i];
             }
-            if (!disableZobrist)
+            if (newGame._useZobrist)
                 newGame.SetZobristHash();
             return newGame;
         }

@@ -222,9 +222,11 @@ namespace MastersAlgorithms.Games
             newGame._blackBoard = _blackBoard;
             newGame._kings = _kings;
             newGame._movesWithoutActivity = _movesWithoutActivity;
+            newGame._capturingPlayer = _capturingPlayer;
+            newGame._forcedStartPosition = _forcedStartPosition;
             newGame._lastMove = _lastMove;
             newGame._moveCounter = _moveCounter;
-            if (!disableZobrist)
+            if (newGame._useZobrist)
                 newGame.SetZobristHash();
             return newGame;
         }
