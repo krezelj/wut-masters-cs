@@ -116,6 +116,9 @@ namespace MastersAlgorithms.Games
                 if (blackCount == 0)
                     return true; // white won
 
+                if (!AnyLegalMoves())
+                    return true; // the opponent won
+
                 // draws
                 if (_movesWithoutActivity >= MOVES_LIMIT)
                     return true;
@@ -124,8 +127,7 @@ namespace MastersAlgorithms.Games
                 if (blackCount == 1 && whiteCount == 1 && BitOperations.PopCount(_kings) == 2)
                     return true;
 
-                // check for legal moves
-                return !AnyLegalMoves();
+                return false;
             }
         }
 
@@ -143,6 +145,9 @@ namespace MastersAlgorithms.Games
                 int blackCount = BitOperations.PopCount(_blackBoard);
                 if (blackCount == 0)
                     return WHITE; // white won
+
+                if (!AnyLegalMoves())
+                    return _opponent; // current player has no moves, opponent won
 
                 // we know the game is over but both players still have pieces
                 // on board so it must be a draw
@@ -585,6 +590,8 @@ namespace MastersAlgorithms.Games
                     value = 1e6f;
                 if (blackCount == 0)
                     value = -1e6f;
+                if (!AnyLegalMoves())
+                    value = _player == BLACK ? -1e6f : 1e6f; // opponent won
                 return value * (_player == BLACK ? 1 : -1);
             }
 
